@@ -1,0 +1,69 @@
+
+/* Container profil */
+.form {
+  max-width: 600px;
+  margin: 100px auto 40px;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* Judul */
+.form h2 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #0f172a;
+}
+
+/* Info profil */
+.profile-info {
+  margin-bottom: 1.5rem;
+}
+
+.profile-info p {
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.profile-info strong {
+  font-weight: 600;
+  color: #475569;
+}
+
+/* Tombol */
+.button {
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  text-decoration: none;
+  border: none;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.button:hover {
+  background-color: #2563eb;
+}
+
+/* Tombol logout */
+.button.danger {
+  background-color: #ef4444;
+}
+
+.button.danger:hover {
+  background-color: #dc2626;
+}
+
+/* Kontainer aksi tombol */
+.form .actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 1.5rem;
+}

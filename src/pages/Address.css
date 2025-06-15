@@ -1,0 +1,232 @@
+/* Address Component Styles */
+
+.address-container {
+  /* Main container for the address component */
+  color: #000;
+}
+
+.address-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.back-button {
+  background-color: #6c757d;
+}
+
+.add-address-button {
+  margin-bottom: 20px;
+}
+
+.address-list-header {
+  /* Styling for address list header */
+}
+
+.address-card {
+  border: 1px solid #ddd;
+  padding: 15px;
+  margin: 10px 0;
+  border-radius: 8px;
+  background-color: white;
+}
+
+.address-card.primary {
+  background-color: #f8f9fa;
+}
+
+.primary-badge {
+  background: #007bff;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  display: inline-block;
+}
+
+.address-info {
+  margin-bottom: 10px;
+}
+
+.address-title {
+  margin: 0 0 10px 0;
+  color: #333;
+}
+
+.address-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.address-full {
+  margin-bottom: 10px;
+}
+
+.address-full strong {
+  /* Bold text styling */
+}
+
+.address-full span {
+  color: #666;
+}
+
+.address-notes {
+  margin-bottom: 15px;
+  padding: 8px;
+  background-color: #f1f3f4;
+  border-radius: 4px;
+}
+
+.address-notes span {
+  color: #666;
+  font-style: italic;
+}
+
+.address-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.edit-button {
+  background-color: #28a745;
+  font-size: 14px;
+  padding: 6px 12px;
+}
+
+.delete-button {
+  background-color: #dc3545;
+  font-size: 14px;
+  padding: 6px 12px;
+}
+
+.primary-button {
+  background-color: #ffc107;
+  color: #000;
+  font-size: 14px;
+  padding: 6px 12px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 2px dashed #dee2e6;
+}
+
+.empty-state h3 {
+  color: #6c757d;
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  color: #6c757d;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-title {
+  margin-top: 0;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Form Styles */
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.form-select:disabled {
+  background-color: #f8f9fa;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  resize: vertical;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.form-col {
+  flex: 1;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.cancel-button {
+  background-color: #6c757d;
+  padding: 10px 20px;
+}
+
+.cancel-button:disabled {
+  cursor: not-allowed;
+}
+
+.submit-button {
+  background-color: #007bff;
+  padding: 10px 20px;
+}
+
+.submit-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}

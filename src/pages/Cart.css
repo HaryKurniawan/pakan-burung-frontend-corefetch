@@ -1,0 +1,55 @@
+/* Cart.css */
+
+/* Container utama */
+.cart-container {
+  max-width: 800px;
+  margin: 100px auto 40px;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  color: #1e293b;
+}
+
+/* Judul */
+.cart-container h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+/* Item kosong */
+.cart-container p {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #64748b;
+}
+
+/* List item */
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* Tombol checkout di CartSummary */
+.button-checkout {
+  background-color: #10b981; /* emerald-500 */
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.button-checkout:disabled {
+  background-color: #9ca3af; /* gray-400 */
+  cursor: not-allowed;
+}
+
+.button-checkout:hover:not(:disabled) {
+  background-color: #059669; /* emerald-600 */
+}
