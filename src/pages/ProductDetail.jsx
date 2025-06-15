@@ -141,6 +141,27 @@ const ProductDetail = () => {
     return stars;
   };
 
+  // Function to get all available photos from product_photos
+  const getProductPhotos = () => {
+    if (!product?.product_photos?.[0]) return [];
+    
+    const photos = [];
+    const photoData = product.product_photos[0];
+    
+    // Add photos in order if they exist
+    if (photoData.url_foto) {
+      photos.push({ url: photoData.url_foto, label: 'Foto 1' });
+    }
+    if (photoData.url_foto_1) {
+      photos.push({ url: photoData.url_foto_1, label: 'Foto 2' });
+    }
+    if (photoData.url_foto_2) {
+      photos.push({ url: photoData.url_foto_2, label: 'Foto 3' });
+    }
+    
+    return photos;
+  };
+
   if (!product) return <p>Loading...</p>;
 
   const increase = () => {
@@ -168,6 +189,9 @@ const ProductDetail = () => {
     navigate('/checkout', { state: { cartItems: [item], totalAmount: product.harga * jumlah } });
   };
 
+  // Get available photos
+  const productPhotos = getProductPhotos();
+
   return (
     <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
       {/* Product Info Section */}
@@ -185,21 +209,42 @@ const ProductDetail = () => {
         <p><strong>Stok:</strong> {product.stok}</p>
         <p><strong>Detail:</strong> {product.detail_produk}</p>
 
-        <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-          {product.product_photos?.slice(0, 3).map((foto, index) => (
-            <img
-              key={foto.id || index}
-              src={foto.url_foto}
-              alt={`Foto ${index + 1}`}
-              style={{
-                width: '150px',
-                height: '150px',
-                objectFit: 'cover',
-                borderRadius: '8px'
-              }}
-            />
-          ))}
-        </div>
+        {/* Updated Photo Display */}
+        {productPhotos.length > 0 && (
+          <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
+            {productPhotos.map((photo, index) => (
+              <img
+                key={index}
+                src={photo.url}
+                alt={photo.label}
+                style={{
+                  width: '150px',
+                  height: '150px',
+                  objectFit: 'cover',
+                  borderRadius: '8px',
+                  border: '1px solid #ddd'
+                }}
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Show message if no photos available */}
+        {productPhotos.length === 0 && (
+          <div style={{ 
+            marginTop: '10px', 
+            padding: '20px', 
+            backgroundColor: '#f8f9fa', 
+            borderRadius: '8px',
+            textAlign: 'center',
+            color: '#666'
+          }}>
+            Tidak ada foto produk tersedia
+          </div>
+        )}
 
         {/* Input Jumlah */}
         <div style={{ marginTop: '20px', display: 'flex', alignItems: 'center', gap: '10px' }}>

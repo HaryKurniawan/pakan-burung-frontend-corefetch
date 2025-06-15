@@ -335,16 +335,78 @@ export const productsAPI = {
   },
 
   create: async (productData) => {
-    const response = await api.post('/products', productData);
-    return response.data[0];
+    // Extract photo data from productData
+    const { url_foto, url_foto_1, url_foto_2, ...productFields } = productData;
+    
+    // Create the product first
+    const productResponse = await api.post('/products', productFields);
+    const newProduct = productResponse.data[0];
+
+    // If there are photo URLs, create the product_photos record
+    if (url_foto || url_foto_1 || url_foto_2) {
+      const photoData = {
+        product_id: newProduct.id,
+        url_foto: url_foto || null,
+        url_foto_1: url_foto_1 || null,
+        url_foto_2: url_foto_2 || null
+      };
+
+      await api.post('/product_photos', photoData);
+    }
+
+    return newProduct;
   },
 
   update: async (productId, productData) => {
-    const response = await api.patch(`/products?id=eq.${productId}`, productData);
-    return response.data[0];
+    try {
+      // Extract photo data from productData
+      const { url_foto, url_foto_1, url_foto_2, ...productFields } = productData;
+      
+      console.log('Updating product:', productId, productFields);
+      console.log('Photo data:', { url_foto, url_foto_1, url_foto_2 });
+      
+      // Update the product first
+      const productResponse = await api.patch(`/products?id=eq.${productId}`, productFields);
+      console.log('Product updated:', productResponse);
+      
+      // Handle photo updates - always try to update photos
+      // Check if product_photos record exists
+      const existingPhotosResponse = await api.get(`/product_photos?product_id=eq.${productId}`);
+      console.log('Existing photos:', existingPhotosResponse.data);
+      
+      const photoData = {
+        url_foto: url_foto || '',
+        url_foto_1: url_foto_1 || '',
+        url_foto_2: url_foto_2 || ''
+      };
+
+      if (existingPhotosResponse.data && existingPhotosResponse.data.length > 0) {
+        // Update existing photo record
+        console.log('Updating existing photos with:', photoData);
+        const photoUpdateResponse = await api.patch(`/product_photos?product_id=eq.${productId}`, photoData);
+        console.log('Photos updated:', photoUpdateResponse);
+      } else {
+        // Create new photo record
+        console.log('Creating new photo record');
+        const newPhotoData = {
+          product_id: productId,
+          ...photoData
+        };
+        const photoCreateResponse = await api.post('/product_photos', newPhotoData);
+        console.log('Photos created:', photoCreateResponse);
+      }
+
+      return productResponse.data?.[0] || productResponse.data;
+    } catch (error) {
+      console.error('Error updating product:', error);
+      throw error;
+    }
   },
 
   delete: async (productId) => {
+    // Delete related photos first (if any)
+    await api.delete(`/product_photos?product_id=eq.${productId}`);
+    // Then delete the product
     await api.delete(`/products?id=eq.${productId}`);
   },
 

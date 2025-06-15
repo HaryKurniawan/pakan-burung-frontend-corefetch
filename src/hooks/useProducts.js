@@ -1,5 +1,8 @@
+// Update your useProducts hook to include fetchProducts function
+// Add this function to your existing useProducts hook
+
 import { useState, useEffect } from 'react';
-import { productsAPI } from '../services/api';
+import { productsAPI } from '../services/api'; // adjust import path as needed
 
 export const useProducts = () => {
   const [products, setProducts] = useState([]);
@@ -9,64 +12,10 @@ export const useProducts = () => {
     try {
       setLoading(true);
       const data = await productsAPI.getAll();
+      console.log('Fetched products:', data);
       setProducts(data);
     } catch (error) {
       console.error('Error fetching products:', error);
-      alert('Error fetching products: ' + (error.response?.data?.message || error.message));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const createProduct = async (productData) => {
-    try {
-      setLoading(true);
-      await productsAPI.create({
-        nama_produk: productData.nama_produk,
-        harga: parseFloat(productData.harga),
-        stok: parseInt(productData.stok),
-        detail_produk: productData.detail_produk
-      });
-      await fetchProducts();
-      alert('Product added successfully!');
-    } catch (error) {
-      console.error('Error creating product:', error);
-      alert('Error creating product: ' + (error.response?.data?.message || error.message));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updateProduct = async (productId, productData) => {
-    try {
-      setLoading(true);
-      await productsAPI.update(productId, {
-        nama_produk: productData.nama_produk,
-        harga: parseFloat(productData.harga),
-        stok: parseInt(productData.stok),
-        detail_produk: productData.detail_produk
-      });
-      await fetchProducts();
-      alert('Product updated successfully!');
-    } catch (error) {
-      console.error('Error updating product:', error);
-      alert('Error updating product: ' + (error.response?.data?.message || error.message));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteProduct = async (productId) => {
-    if (!window.confirm('Are you sure you want to delete this product?')) return;
-
-    try {
-      setLoading(true);
-      await productsAPI.delete(productId);
-      await fetchProducts();
-      alert('Product deleted successfully!');
-    } catch (error) {
-      console.error('Error deleting product:', error);
-      alert('Error deleting product: ' + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
     }
@@ -75,6 +24,61 @@ export const useProducts = () => {
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  const createProduct = async (productData) => {
+    try {
+      setLoading(true);
+      console.log('Creating product with data:', productData);
+      const newProduct = await productsAPI.create(productData);
+      console.log('Created product:', newProduct);
+      
+      // Refresh the products list after creating
+      await fetchProducts();
+      
+      return newProduct;
+    } catch (error) {
+      console.error('Error creating product:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateProduct = async (productId, productData) => {
+    try {
+      setLoading(true);
+      console.log('Updating product:', productId, 'with data:', productData);
+      const updatedProduct = await productsAPI.update(productId, productData);
+      console.log('Updated product:', updatedProduct);
+      
+      // Refresh the products list after updating
+      await fetchProducts();
+      
+      return updatedProduct;
+    } catch (error) {
+      console.error('Error updating product:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteProduct = async (productId) => {
+    try {
+      setLoading(true);
+      console.log('Deleting product:', productId);
+      await productsAPI.delete(productId);
+      
+      // Refresh the products list after deleting
+      await fetchProducts();
+      
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return {
     products,

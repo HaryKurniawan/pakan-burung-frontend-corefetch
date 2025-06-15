@@ -4,9 +4,9 @@ import ProductForm from '../../components/admin/ProductForm';
 import AdminProductList from '../../components/admin/AdminProductList';
 import './admin.css'
 
-// Pakai langsung variabel dari .env
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
+
 const SUPABASE_HEADERS = {
   'apikey': SUPABASE_KEY,
   'Authorization': `Bearer ${SUPABASE_KEY}`,
@@ -14,7 +14,7 @@ const SUPABASE_HEADERS = {
 };
 
 const AdminPanel = () => {
-  const { products, createProduct, updateProduct, deleteProduct, loading } = useProducts();
+  const { products, createProduct, updateProduct, deleteProduct, loading, fetchProducts } = useProducts();
   const [editingProduct, setEditingProduct] = useState(null);
 
   const [orders, setOrders] = useState([]);
@@ -68,15 +68,33 @@ const AdminPanel = () => {
   };
 
   const handleProductSubmit = async (productData) => {
-    if (editingProduct) {
-      await updateProduct(editingProduct.id, productData);
-      setEditingProduct(null);
-    } else {
-      await createProduct(productData);
+    try {
+      console.log('Submitting product data:', productData);
+      
+      if (editingProduct) {
+        console.log('Updating product with ID:', editingProduct.id);
+        await updateProduct(editingProduct.id, productData);
+        alert('Produk berhasil diperbarui!');
+        setEditingProduct(null);
+      } else {
+        console.log('Creating new product');
+        await createProduct(productData);
+        alert('Produk berhasil ditambahkan!');
+      }
+
+      // Force refresh products list
+      if (fetchProducts) {
+        await fetchProducts();
+      }
+      
+    } catch (error) {
+      console.error('Error submitting product:', error);
+      alert('Gagal menyimpan produk: ' + error.message);
     }
   };
 
   const handleEditProduct = (product) => {
+    console.log('Editing product:', product);
     setEditingProduct(product);
   };
 
@@ -85,7 +103,20 @@ const AdminPanel = () => {
   };
 
   const handleDeleteProduct = async (productId) => {
-    await deleteProduct(productId);
+    try {
+      if (confirm('Apakah Anda yakin ingin menghapus produk ini?')) {
+        await deleteProduct(productId);
+        alert('Produk berhasil dihapus!');
+        
+        // Force refresh products list
+        if (fetchProducts) {
+          await fetchProducts();
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      alert('Gagal menghapus produk: ' + error.message);
+    }
   };
 
   return (
@@ -93,45 +124,44 @@ const AdminPanel = () => {
       <h2>Admin Panel</h2>
 
       {/* Bagian Kelola Status Pesanan */}
-    <div className="admin-orders">
-  <h3>Kelola Status Pesanan</h3>
-  <div className="order-table-wrapper">
-    <table className="order-table">
-      <thead>
-        <tr>
-          <th>No. Pesanan</th>
-          <th>Status Saat Ini</th>
-          <th>Ubah Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        {orders.map((order) => (
-          <tr key={order.id}>
-            <td className="order-number">{order.order_number}</td>
-            <td className="order-status">
-              {statuses.find(s => s.id === order.status_id)?.nama || 'Tidak Diketahui'}
-            </td>
-            <td>
-              <select
-                className="status-select"
-                value={order.status_id}
-                onChange={(e) => handleStatusChange(order.id, parseInt(e.target.value))}
-              >
-                {statuses.map((status) => (
-                  <option key={status.id} value={status.id}>
-                    {status.nama}
-                  </option>
-                ))}
-              </select>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</div>
-
-
+      <div className="admin-orders">
+        <h3>Kelola Status Pesanan</h3>
+        <div className="order-table-wrapper">
+          <table className="order-table">
+            <thead>
+              <tr>
+                <th>No. Pesanan</th>
+                <th>Status Saat Ini</th>
+                <th>Ubah Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((order) => (
+                <tr key={order.id}>
+                  <td className="order-number">{order.order_number}</td>
+                  <td className="order-status">
+                    {statuses.find(s => s.id === order.status_id)?.nama || 'Tidak Diketahui'}
+                  </td>
+                  <td>
+                    <select
+                      className="status-select"
+                      value={order.status_id}
+                      onChange={(e) => handleStatusChange(order.id, parseInt(e.target.value))}
+                    >
+                      {statuses.map((status) => (
+                        <option key={status.id} value={status.id}>
+                          {status.nama}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
       <ProductForm 
         onSubmit={handleProductSubmit}
         editingProduct={editingProduct}

@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import './ProductForm.css'
 
 const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
   const [formData, setFormData] = useState({
     nama_produk: '',
     harga: '',
     stok: '',
-    detail_produk: ''
+    detail_produk: '',
+    url_foto: '',
+    url_foto_1: '',
+    url_foto_2: ''
   });
 
   useEffect(() => {
@@ -14,14 +18,20 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
         nama_produk: editingProduct.nama_produk,
         harga: editingProduct.harga.toString(),
         stok: editingProduct.stok.toString(),
-        detail_produk: editingProduct.detail_produk
+        detail_produk: editingProduct.detail_produk,
+        url_foto: editingProduct.product_photos?.[0]?.url_foto || '',
+        url_foto_1: editingProduct.product_photos?.[0]?.url_foto_1 || '',
+        url_foto_2: editingProduct.product_photos?.[0]?.url_foto_2 || ''
       });
     } else {
       setFormData({
         nama_produk: '',
         harga: '',
         stok: '',
-        detail_produk: ''
+        detail_produk: '',
+        url_foto: '',
+        url_foto_1: '',
+        url_foto_2: ''
       });
     }
   }, [editingProduct]);
@@ -33,7 +43,10 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
       nama_produk: '',
       harga: '',
       stok: '',
-      detail_produk: ''
+      detail_produk: '',
+      url_foto: '',
+      url_foto_1: '',
+      url_foto_2: ''
     });
   };
 
@@ -50,7 +63,10 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
       nama_produk: '',
       harga: '',
       stok: '',
-      detail_produk: ''
+      detail_produk: '',
+      url_foto: '',
+      url_foto_1: '',
+      url_foto_2: ''
     });
   };
 
@@ -93,6 +109,63 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
           onChange={handleChange}
           required
         />
+        
+        {/* Photo URL Fields */}
+        <div className="photo-section">
+          <h4>Product Photos</h4>
+          <input
+            className="input"
+            type="url"
+            name="url_foto"
+            placeholder="Main Photo URL"
+            value={formData.url_foto}
+            onChange={handleChange}
+          />
+          <input
+            className="input"
+            type="url"
+            name="url_foto_1"
+            placeholder="Additional Photo URL 1"
+            value={formData.url_foto_1}
+            onChange={handleChange}
+          />
+          <input
+            className="input"
+            type="url"
+            name="url_foto_2"
+            placeholder="Additional Photo URL 2"
+            value={formData.url_foto_2}
+            onChange={handleChange}
+          />
+        </div>
+
+        {/* Photo Preview */}
+        {(formData.url_foto || formData.url_foto_1 || formData.url_foto_2) && (
+          <div className="photo-preview">
+            <h4>Photo Preview</h4>
+            <div className="preview-grid">
+              {formData.url_foto && (
+                <div className="preview-item">
+                  <img src={formData.url_foto} alt="Main preview" />
+                  <span>Main Photo</span>
+                </div>
+              )}
+              {formData.url_foto_1 && (
+                <div className="preview-item">
+                  <img src={formData.url_foto_1} alt="Additional preview 1" />
+                  <span>Photo 1</span>
+                </div>
+              )}
+              {formData.url_foto_2 && (
+                <div className="preview-item">
+                  <img src={formData.url_foto_2} alt="Additional preview 2" />
+                  <span>Photo 2</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         <button className="button" type="submit" disabled={loading}>
           {loading ? 'Loading...' : editingProduct ? 'Update Product' : 'Add Product'}
         </button>
