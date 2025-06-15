@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ordersAPI } from '../services/api';
+import { ordersAPI, reviewsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import './Orders.css';
 
@@ -13,6 +13,15 @@ const Orders = () => {
   const [trackingHistory, setTrackingHistory] = useState([]);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelReason, setCancelReason] = useState('');
+  
+  // Review states
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [reviewData, setReviewData] = useState({
+    rating: 5,
+    ulasan: ''
+  });
+  const [productReviews, setProductReviews] = useState({});
 
   useEffect(() => {
     loadOrders();
@@ -22,11 +31,34 @@ const Orders = () => {
     try {
       const userOrders = await ordersAPI.getUserOrders(currentUser.id);
       setOrders(userOrders);
+      
+      // Load existing reviews for delivered orders
+      await loadExistingReviews(userOrders);
     } catch (error) {
       console.error('Error loading orders:', error);
       alert('Gagal memuat pesanan');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadExistingReviews = async (orders) => {
+    try {
+      const deliveredOrders = orders.filter(order => order.order_status.nama === 'delivered');
+      const reviews = {};
+      
+      for (const order of deliveredOrders) {
+        for (const item of order.order_items) {
+          const existingReview = await reviewsAPI.getUserProductReview(currentUser.id, item.product_id);
+          if (existingReview) {
+            reviews[item.product_id] = existingReview;
+          }
+        }
+      }
+      
+      setProductReviews(reviews);
+    } catch (error) {
+      console.error('Error loading reviews:', error);
     }
   };
 
@@ -59,6 +91,64 @@ const Orders = () => {
     }
   };
 
+  const handleReviewProduct = (product, orderId) => {
+    setSelectedProduct({ ...product, orderId });
+    
+    // Check if review already exists
+    const existingReview = productReviews[product.id];
+    if (existingReview) {
+      setReviewData({
+        rating: existingReview.rating,
+        ulasan: existingReview.ulasan
+      });
+    } else {
+      setReviewData({
+        rating: 5,
+        ulasan: ''
+      });
+    }
+    
+    setShowReviewModal(true);
+  };
+
+  const handleSubmitReview = async () => {
+    if (!reviewData.ulasan.trim()) {
+      alert('Harap berikan ulasan Anda');
+      return;
+    }
+
+    try {
+      const existingReview = productReviews[selectedProduct.id];
+      
+      if (existingReview) {
+        // Update existing review
+        await reviewsAPI.updateReview(existingReview.id, {
+          rating: reviewData.rating,
+          ulasan: reviewData.ulasan.trim()
+        });
+        alert('Ulasan berhasil diperbarui!');
+      } else {
+        // Create new review
+        await reviewsAPI.createReview({
+          user_id: currentUser.id,
+          product_id: selectedProduct.id,
+          rating: reviewData.rating,
+          ulasan: reviewData.ulasan.trim()
+        });
+        alert('Terima kasih atas ulasan Anda!');
+      }
+      
+      // Refresh reviews
+      await loadOrders();
+      setShowReviewModal(false);
+      setSelectedProduct(null);
+      setReviewData({ rating: 5, ulasan: '' });
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      alert('Gagal menyimpan ulasan');
+    }
+  };
+
   const getStatusColor = (statusName) => {
     const colors = {
       'pending': '#fbbf24',
@@ -85,6 +175,26 @@ const Orders = () => {
 
   const canCancelOrder = (status) => {
     return ['pending', 'confirmed'].includes(status);
+  };
+
+  const canReviewOrder = (status) => {
+    return status === 'delivered';
+  };
+
+  const renderStars = (rating, onRatingChange = null) => {
+    return (
+      <div className="rating-stars">
+        {[1, 2, 3, 4, 5].map(star => (
+          <span
+            key={star}
+            className={`star ${star <= rating ? 'filled' : ''} ${onRatingChange ? 'clickable' : ''}`}
+            onClick={onRatingChange ? () => onRatingChange(star) : undefined}
+          >
+            ⭐
+          </span>
+        ))}
+      </div>
+    );
   };
 
   if (loading) {
@@ -145,11 +255,36 @@ const Orders = () => {
               <div className="order-items">
                 {order.order_items.map(item => (
                   <div key={item.id} className="order-item">
-                    <span className="item-name">{item.products.nama_produk}</span>
-                    <span className="item-quantity">x{item.quantity}</span>
-                    <span className="item-price">
-                      Rp {Number(item.subtotal).toLocaleString()}
-                    </span>
+                    <div className="item-info">
+                      <span className="item-name">{item.products.nama_produk}</span>
+                      <span className="item-quantity">x{item.quantity}</span>
+                      <span className="item-price">
+                        Rp {Number(item.subtotal).toLocaleString()}
+                      </span>
+                    </div>
+                    
+                    {canReviewOrder(order.order_status.nama) && (
+                      <div className="item-review">
+                        {productReviews[item.product_id] ? (
+                          <div className="existing-review">
+                            {renderStars(productReviews[item.product_id].rating)}
+                            <button 
+                              onClick={() => handleReviewProduct(item.products, order.id)}
+                              className="edit-review-button"
+                            >
+                              Edit Ulasan
+                            </button>
+                          </div>
+                        ) : (
+                          <button 
+                            onClick={() => handleReviewProduct(item.products, order.id)}
+                            className="review-button"
+                          >
+                            ⭐ Beri Ulasan
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -202,9 +337,29 @@ const Orders = () => {
                 <h4>🛒 Item Pesanan</h4>
                 {selectedOrder.order_items.map(item => (
                   <div key={item.id} className="detail-item">
-                    <span>{item.products.nama_produk}</span>
-                    <span>{item.quantity} × Rp {Number(item.price).toLocaleString()}</span>
-                    <strong>Rp {Number(item.subtotal).toLocaleString()}</strong>
+                    <div className="item-details">
+                      <span>{item.products.nama_produk}</span>
+                      <span>{item.quantity} × Rp {Number(item.price).toLocaleString()}</span>
+                      <strong>Rp {Number(item.subtotal).toLocaleString()}</strong>
+                    </div>
+                    
+                    {canReviewOrder(selectedOrder.order_status.nama) && (
+                      <div className="item-review-inline">
+                        {productReviews[item.product_id] ? (
+                          <div className="review-status">
+                            <span>Sudah diulas:</span>
+                            {renderStars(productReviews[item.product_id].rating)}
+                          </div>
+                        ) : (
+                          <button 
+                            onClick={() => handleReviewProduct(item.products, selectedOrder.id)}
+                            className="review-button-small"
+                          >
+                            Beri Ulasan
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -294,6 +449,64 @@ const Orders = () => {
                   className="confirm-cancel-button"
                 >
                   Ya, Batalkan Pesanan
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Review Modal */}
+      {showReviewModal && selectedProduct && (
+        <div className="modal-overlay" onClick={() => setShowReviewModal(false)}>
+          <div className="modal-content review-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>
+                {productReviews[selectedProduct.id] ? 'Edit Ulasan' : 'Beri Ulasan'}
+              </h3>
+              <button 
+                onClick={() => setShowReviewModal(false)}
+                className="close-button"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="product-info">
+                <h4>{selectedProduct.nama_produk}</h4>
+              </div>
+
+              <div className="rating-section">
+                <label>Rating:</label>
+                {renderStars(reviewData.rating, (rating) => setReviewData({...reviewData, rating}))}
+                <span className="rating-text">({reviewData.rating} dari 5 bintang)</span>
+              </div>
+
+              <div className="review-text-section">
+                <label htmlFor="reviewText">Ulasan Anda:</label>
+                <textarea
+                  id="reviewText"
+                  value={reviewData.ulasan}
+                  onChange={(e) => setReviewData({...reviewData, ulasan: e.target.value})}
+                  placeholder="Bagikan pengalaman Anda dengan produk ini..."
+                  rows="4"
+                  className="review-textarea"
+                />
+              </div>
+
+              <div className="review-actions">
+                <button 
+                  onClick={() => setShowReviewModal(false)}
+                  className="cancel-review-button"
+                >
+                  Batal
+                </button>
+                <button 
+                  onClick={handleSubmitReview}
+                  className="submit-review-button"
+                >
+                  {productReviews[selectedProduct.id] ? 'Perbarui Ulasan' : 'Kirim Ulasan'}
                 </button>
               </div>
             </div>

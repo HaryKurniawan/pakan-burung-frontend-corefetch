@@ -684,3 +684,272 @@
     margin: 10px;
   }
 }
+
+/* Additional CSS for Review Features - Add this to your Orders.css */
+
+/* Review button styles */
+.review-button {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+
+.review-button:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+.review-button-small {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.review-button-small:hover {
+  background: #059669;
+}
+
+.edit-review-button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: 8px;
+}
+
+.edit-review-button:hover {
+  background: #2563eb;
+}
+
+/* Order item review section */
+.order-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.item-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.item-review {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.existing-review {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.item-review-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.review-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Rating stars */
+.rating-stars {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.star {
+  font-size: 16px;
+  color: #d1d5db;
+  transition: color 0.2s;
+}
+
+.star.filled {
+  color: #fbbf24;
+}
+
+.star.clickable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.star.clickable:hover {
+  color: #f59e0b;
+  transform: scale(1.1);
+}
+
+/* Review modal */
+.review-modal {
+  max-width: 500px;
+  width: 90%;
+}
+
+.product-info {
+  margin-bottom: 20px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.product-info h4 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 16px;
+}
+
+.rating-section {
+  margin-bottom: 20px;
+}
+
+.rating-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.rating-text {
+  margin-left: 8px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.review-text-section {
+  margin-bottom: 20px;
+}
+
+.review-text-section label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.review-textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.review-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.review-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.cancel-review-button {
+  background: #6b7280;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.cancel-review-button:hover {
+  background: #4b5563;
+}
+
+.submit-review-button {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.submit-review-button:hover {
+  background: #059669;
+  transform: translateY(-1px);
+}
+
+/* Detail item with review */
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.item-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .item-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .item-review {
+    justify-content: flex-start;
+  }
+  
+  .review-modal {
+    max-width: 95%;
+    margin: 20px;
+  }
+  
+  .rating-stars {
+    justify-content: flex-start;
+  }
+  
+  .star {
+    font-size: 20px;
+  }
+}

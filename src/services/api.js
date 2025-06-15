@@ -255,7 +255,77 @@ export const ordersAPI = {
   }
 };
 
+export const reviewsAPI = {
+  // Create new review
+  createReview: async (reviewData) => {
+    const response = await api.post('/reviews', {
+      user_id: reviewData.user_id,
+      product_id: reviewData.product_id,
+      rating: reviewData.rating,
+      ulasan: reviewData.ulasan,
+      tanggal: new Date().toISOString()
+    });
+    return response.data[0];
+  },
 
+  // Update existing review
+  updateReview: async (reviewId, reviewData) => {
+    const response = await api.patch(`/reviews?id=eq.${reviewId}`, {
+      rating: reviewData.rating,
+      ulasan: reviewData.ulasan,
+      tanggal: new Date().toISOString()
+    });
+    return response.data[0];
+  },
+
+  // Get user's review for a specific product
+  getUserProductReview: async (userId, productId) => {
+    const response = await api.get(
+      `/reviews?user_id=eq.${userId}&product_id=eq.${productId}&select=*`
+    );
+    return response.data[0] || null;
+  },
+
+  // Get all reviews for a product
+  getProductReviews: async (productId) => {
+    const response = await api.get(
+      `/reviews?product_id=eq.${productId}&select=*,users(nama,username)&order=tanggal.desc`
+    );
+    return response.data;
+  },
+
+  // Get user's all reviews
+  getUserReviews: async (userId) => {
+    const response = await api.get(
+      `/reviews?user_id=eq.${userId}&select=*,products(nama_produk)&order=tanggal.desc`
+    );
+    return response.data;
+  },
+
+  // Delete review
+  deleteReview: async (reviewId) => {
+    await api.delete(`/reviews?id=eq.${reviewId}`);
+  },
+
+  // Get average rating for a product
+  getProductAverageRating: async (productId) => {
+    const response = await api.get(
+      `/reviews?product_id=eq.${productId}&select=rating`
+    );
+    
+    if (response.data.length === 0) {
+      return { average: 0, count: 0 };
+    }
+    
+    const ratings = response.data.map(review => review.rating);
+    const average = ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length;
+    
+    return {
+      average: Math.round(average * 10) / 10, // Round to 1 decimal place
+      count: ratings.length
+    };
+  }
+};
 
 // Products API
 export const productsAPI = {
