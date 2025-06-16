@@ -12,37 +12,50 @@ const ProductDetail = () => {
   const [jumlah, setJumlah] = useState(1);
   const [reviews, setReviews] = useState([]);
   const [averageRating, setAverageRating] = useState({ average: 0, count: 0 });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProduct = async () => {
-      const response = await api.get(`/products?id=eq.${id}&select=*,product_photos(*)`);
-      setProduct(response.data?.[0]);
+      try {
+        const response = await api.get(`/products?id=eq.${id}&select=*,product_photos(*)`);
+        setProduct(response.data?.[0]);
+      } catch (error) {
+        console.error('Error fetching product:', error);
+      }
     };
     fetchProduct();
   }, [id]);
 
   useEffect(() => {
     if (id) {
-      fetchReviews();
-      fetchAverageRating();
+      fetchProductReviews();
     }
   }, [id]);
 
-  const fetchReviews = async () => {
+  const fetchProductReviews = async () => {
     try {
-      const reviewsData = await reviewsAPI.getProductReviews(id);
+      setLoading(true);
+      // Use the new API method to get product reviews from orders
+      const reviewsData = await reviewsAPI.getProductReviewsFromOrders(parseInt(id));
       setReviews(reviewsData);
+      
+      // Calculate average rating
+      if (reviewsData.length > 0) {
+        const totalRating = reviewsData.reduce((sum, review) => sum + review.rating, 0);
+        const average = totalRating / reviewsData.length;
+        setAverageRating({
+          average: average,
+          count: reviewsData.length
+        });
+      } else {
+        setAverageRating({ average: 0, count: 0 });
+      }
     } catch (error) {
       console.error('Error fetching reviews:', error);
-    }
-  };
-
-  const fetchAverageRating = async () => {
-    try {
-      const rating = await reviewsAPI.getProductAverageRating(id);
-      setAverageRating(rating);
-    } catch (error) {
-      console.error('Error fetching average rating:', error);
+      setReviews([]);
+      setAverageRating({ average: 0, count: 0 });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -200,65 +213,85 @@ const ProductDetail = () => {
       <div style={{ borderTop: '1px solid #eee', paddingTop: '30px' }}>
         <h3>Ulasan Produk</h3>
         
-        {/* Rating Summary */}
-        <div style={{ 
-          backgroundColor: '#f8f9fa', 
-          padding: '20px', 
-          borderRadius: '8px', 
-          marginBottom: '20px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '20px'
-        }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#333' }}>
-              {averageRating.average.toFixed(1)}
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '5px' }}>
-              {renderStars(Math.round(averageRating.average), 20)}
-            </div>
-            <div style={{ color: '#666', fontSize: '14px' }}>
-              {averageRating.count} ulasan
-            </div>
-          </div>
-        </div>
-
-        {/* Reviews List */}
-        <div>
-          <h4>Semua Ulasan ({reviews.length})</h4>
-          {reviews.length === 0 ? (
-            <p style={{ color: '#666', fontStyle: 'italic' }}>Belum ada ulasan untuk produk ini.</p>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-              {reviews.map((review) => (
-                <div 
-                  key={review.id} 
-                  style={{ 
-                    border: '1px solid #eee', 
-                    borderRadius: '8px', 
-                    padding: '15px' 
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '8px' }}>
-                    <div>
-                      <strong>{review.users?.nama || 'Anonymous'}</strong>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px' }}>
-                        {renderStars(review.rating)}
-                        <span style={{ fontSize: '14px', color: '#666' }}>
-                          ({review.rating}/5)
-                        </span>
-                      </div>
-                    </div>
-                    <span style={{ fontSize: '12px', color: '#999' }}>
-                      {new Date(review.tanggal).toLocaleDateString('id-ID')}
-                    </span>
-                  </div>
-                  <p style={{ margin: 0, lineHeight: '1.4' }}>{review.ulasan}</p>
+        {/* Loading state for reviews */}
+        {loading ? (
+          <p>Memuat ulasan...</p>
+        ) : (
+          <>
+            {/* Rating Summary */}
+            <div style={{ 
+              backgroundColor: '#f8f9fa', 
+              padding: '20px', 
+              borderRadius: '8px', 
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '20px'
+            }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '36px', fontWeight: 'bold', color: '#333' }}>
+                  {averageRating.average.toFixed(1)}
                 </div>
-              ))}
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '5px' }}>
+                  {renderStars(Math.round(averageRating.average), 20)}
+                </div>
+                <div style={{ color: '#666', fontSize: '14px' }}>
+                  {averageRating.count} ulasan
+                </div>
+              </div>
             </div>
-          )}
-        </div>
+
+            {/* Reviews List */}
+            <div>
+              <h4>Semua Ulasan ({reviews.length})</h4>
+              {reviews.length === 0 ? (
+                <p style={{ color: '#666', fontStyle: 'italic' }}>Belum ada ulasan untuk produk ini.</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  {reviews.map((review) => {
+                    // Find the specific product in the order items
+                    const productInOrder = review.orders?.order_items?.find(item => 
+                      item.product_id === parseInt(id)
+                    );
+                    
+                    return (
+                      <div 
+                        key={review.id} 
+                        style={{ 
+                          border: '1px solid #eee', 
+                          borderRadius: '8px', 
+                          padding: '15px' 
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '8px' }}>
+                          <div>
+                            <strong>{review.users?.nama || 'Anonymous'}</strong>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px' }}>
+                              {renderStars(review.rating)}
+                              <span style={{ fontSize: '14px', color: '#666' }}>
+                                ({review.rating}/5)
+                              </span>
+                            </div>
+                            {/* Show quantity purchased if available */}
+                            {productInOrder && (
+                              <div style={{ fontSize: '12px', color: '#888', marginTop: '2px' }}>
+                                Membeli {productInOrder.quantity} item
+                              </div>
+                            )}
+                          </div>
+                          <span style={{ fontSize: '12px', color: '#999' }}>
+                            {new Date(review.tanggal).toLocaleDateString('id-ID')}
+                          </span>
+                        </div>
+                        <p style={{ margin: 0, lineHeight: '1.4' }}>{review.ulasan}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

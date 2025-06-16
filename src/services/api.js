@@ -464,11 +464,11 @@ export const ordersAPI = {
 };
 
 export const reviewsAPI = {
-  // Create new review
-  createReview: async (reviewData) => {
-    const response = await api.post('/reviews', {
+  // Create new order review
+  createOrderReview: async (reviewData) => {
+    const response = await api.post('/order_reviews', {
       user_id: reviewData.user_id,
-      product_id: reviewData.product_id,
+      order_id: reviewData.order_id,
       rating: reviewData.rating,
       ulasan: reviewData.ulasan,
       tanggal: new Date().toISOString()
@@ -476,9 +476,9 @@ export const reviewsAPI = {
     return response.data[0];
   },
 
-  // Update existing review
-  updateReview: async (reviewId, reviewData) => {
-    const response = await api.patch(`/reviews?id=eq.${reviewId}`, {
+  // Update existing order review
+  updateOrderReview: async (reviewId, reviewData) => {
+    const response = await api.patch(`/order_reviews?id=eq.${reviewId}`, {
       rating: reviewData.rating,
       ulasan: reviewData.ulasan,
       tanggal: new Date().toISOString()
@@ -486,54 +486,50 @@ export const reviewsAPI = {
     return response.data[0];
   },
 
-  // Get user's review for a specific product
-  getUserProductReview: async (userId, productId) => {
+  // Get user's review for a specific order
+  getUserOrderReview: async (userId, orderId) => {
     const response = await api.get(
-      `/reviews?user_id=eq.${userId}&product_id=eq.${productId}&select=*`
+      `/order_reviews?user_id=eq.${userId}&order_id=eq.${orderId}&select=*`
     );
     return response.data[0] || null;
   },
 
-  // Get all reviews for a product
-  getProductReviews: async (productId) => {
+  // Get all reviews for an order (usually just one)
+  getOrderReviews: async (orderId) => {
     const response = await api.get(
-      `/reviews?product_id=eq.${productId}&select=*,users(nama,username)&order=tanggal.desc`
+      `/order_reviews?order_id=eq.${orderId}&select=*,users(nama,username)&order=tanggal.desc`
     );
     return response.data;
   },
 
-  // Get user's all reviews
-  getUserReviews: async (userId) => {
+  // Get user's all order reviews
+  getUserOrderReviews: async (userId) => {
     const response = await api.get(
-      `/reviews?user_id=eq.${userId}&select=*,products(nama_produk)&order=tanggal.desc`
+      `/order_reviews?user_id=eq.${userId}&select=*,orders(order_number,order_items(products(nama_produk),quantity))&order=tanggal.desc`
     );
     return response.data;
   },
 
-  // Delete review
-  deleteReview: async (reviewId) => {
-    await api.delete(`/reviews?id=eq.${reviewId}`);
+  // Delete order review
+  deleteOrderReview: async (reviewId) => {
+    await api.delete(`/order_reviews?id=eq.${reviewId}`);
   },
 
-  // Get average rating for a product
-  getProductAverageRating: async (productId) => {
+  // Get reviews for products (aggregate from order reviews)
+  getProductReviewsFromOrders: async (productId) => {
     const response = await api.get(
-      `/reviews?product_id=eq.${productId}&select=rating`
+      `/order_reviews?select=*,users(nama,username),orders(order_items(product_id,products(nama_produk),quantity))&order=tanggal.desc`
     );
     
-    if (response.data.length === 0) {
-      return { average: 0, count: 0 };
-    }
+    // Filter reviews that contain the specific product
+    const filteredReviews = response.data.filter(review => 
+      review.orders.order_items.some(item => item.product_id === productId)
+    );
     
-    const ratings = response.data.map(review => review.rating);
-    const average = ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length;
-    
-    return {
-      average: Math.round(average * 10) / 10, // Round to 1 decimal place
-      count: ratings.length
-    };
+    return filteredReviews;
   }
 };
+
 
 // Products API with file upload support
 export const productsAPI = {

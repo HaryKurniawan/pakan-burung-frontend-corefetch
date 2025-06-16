@@ -16,12 +16,12 @@ const Orders = () => {
   
   // Review states
   const [showReviewModal, setShowReviewModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedOrderForReview, setSelectedOrderForReview] = useState(null);
   const [reviewData, setReviewData] = useState({
     rating: 5,
     ulasan: ''
   });
-  const [productReviews, setProductReviews] = useState({});
+  const [orderReviews, setOrderReviews] = useState({});
 
   useEffect(() => {
     loadOrders();
@@ -33,7 +33,7 @@ const Orders = () => {
       setOrders(userOrders);
       
       // Load existing reviews for delivered orders
-      await loadExistingReviews(userOrders);
+      await loadExistingOrderReviews(userOrders);
     } catch (error) {
       console.error('Error loading orders:', error);
       alert('Gagal memuat pesanan');
@@ -42,21 +42,19 @@ const Orders = () => {
     }
   };
 
-  const loadExistingReviews = async (orders) => {
+  const loadExistingOrderReviews = async (orders) => {
     try {
       const deliveredOrders = orders.filter(order => order.order_status.nama === 'delivered');
       const reviews = {};
       
       for (const order of deliveredOrders) {
-        for (const item of order.order_items) {
-          const existingReview = await reviewsAPI.getUserProductReview(currentUser.id, item.product_id);
-          if (existingReview) {
-            reviews[item.product_id] = existingReview;
-          }
+        const existingReview = await reviewsAPI.getUserOrderReview(currentUser.id, order.id);
+        if (existingReview) {
+          reviews[order.id] = existingReview;
         }
       }
       
-      setProductReviews(reviews);
+      setOrderReviews(reviews);
     } catch (error) {
       console.error('Error loading reviews:', error);
     }
@@ -91,11 +89,11 @@ const Orders = () => {
     }
   };
 
-  const handleReviewProduct = (product, orderId) => {
-    setSelectedProduct({ ...product, orderId });
+  const handleReviewOrder = (order) => {
+    setSelectedOrderForReview(order);
     
-    // Check if review already exists
-    const existingReview = productReviews[product.id];
+    // Check if review already exists for this order
+    const existingReview = orderReviews[order.id];
     if (existingReview) {
       setReviewData({
         rating: existingReview.rating,
@@ -118,30 +116,30 @@ const Orders = () => {
     }
 
     try {
-      const existingReview = productReviews[selectedProduct.id];
+      const existingReview = orderReviews[selectedOrderForReview.id];
       
       if (existingReview) {
-        // Update existing review
-        await reviewsAPI.updateReview(existingReview.id, {
+        // Update existing order review
+        await reviewsAPI.updateOrderReview(existingReview.id, {
           rating: reviewData.rating,
           ulasan: reviewData.ulasan.trim()
         });
-        alert('Ulasan berhasil diperbarui!');
+        alert('Ulasan pesanan berhasil diperbarui!');
       } else {
-        // Create new review
-        await reviewsAPI.createReview({
+        // Create new order review
+        await reviewsAPI.createOrderReview({
           user_id: currentUser.id,
-          product_id: selectedProduct.id,
+          order_id: selectedOrderForReview.id,
           rating: reviewData.rating,
           ulasan: reviewData.ulasan.trim()
         });
-        alert('Terima kasih atas ulasan Anda!');
+        alert('Terima kasih atas ulasan pesanan Anda!');
       }
       
       // Refresh reviews
       await loadOrders();
       setShowReviewModal(false);
-      setSelectedProduct(null);
+      setSelectedOrderForReview(null);
       setReviewData({ rating: 5, ulasan: '' });
     } catch (error) {
       console.error('Error submitting review:', error);
@@ -262,29 +260,6 @@ const Orders = () => {
                         Rp {Number(item.subtotal).toLocaleString()}
                       </span>
                     </div>
-                    
-                    {canReviewOrder(order.order_status.nama) && (
-                      <div className="item-review">
-                        {productReviews[item.product_id] ? (
-                          <div className="existing-review">
-                            {renderStars(productReviews[item.product_id].rating)}
-                            <button 
-                              onClick={() => handleReviewProduct(item.products, order.id)}
-                              className="edit-review-button"
-                            >
-                              Edit Ulasan
-                            </button>
-                          </div>
-                        ) : (
-                          <button 
-                            onClick={() => handleReviewProduct(item.products, order.id)}
-                            className="review-button"
-                          >
-                            ⭐ Beri Ulasan
-                          </button>
-                        )}
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
@@ -310,6 +285,28 @@ const Orders = () => {
                     >
                       Batalkan
                     </button>
+                  )}
+                  {canReviewOrder(order.order_status.nama) && (
+                    <div className="order-review-section">
+                      {orderReviews[order.id] ? (
+                        <div className="existing-review">
+                          {renderStars(orderReviews[order.id].rating)}
+                          <button 
+                            onClick={() => handleReviewOrder(order)}
+                            className="edit-review-button"
+                          >
+                            Edit Ulasan
+                          </button>
+                        </div>
+                      ) : (
+                        <button 
+                          onClick={() => handleReviewOrder(order)}
+                          className="review-button"
+                        >
+                          ⭐ Beri Ulasan
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
@@ -342,24 +339,6 @@ const Orders = () => {
                       <span>{item.quantity} × Rp {Number(item.price).toLocaleString()}</span>
                       <strong>Rp {Number(item.subtotal).toLocaleString()}</strong>
                     </div>
-                    
-                    {canReviewOrder(selectedOrder.order_status.nama) && (
-                      <div className="item-review-inline">
-                        {productReviews[item.product_id] ? (
-                          <div className="review-status">
-                            <span>Sudah diulas:</span>
-                            {renderStars(productReviews[item.product_id].rating)}
-                          </div>
-                        ) : (
-                          <button 
-                            onClick={() => handleReviewProduct(item.products, selectedOrder.id)}
-                            className="review-button-small"
-                          >
-                            Beri Ulasan
-                          </button>
-                        )}
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
@@ -403,6 +382,31 @@ const Orders = () => {
               <div className="total-section">
                 <h3>Total: Rp {Number(selectedOrder.total_amount).toLocaleString()}</h3>
               </div>
+
+              {canReviewOrder(selectedOrder.order_status.nama) && (
+                <div className="modal-review-section">
+                  {orderReviews[selectedOrder.id] ? (
+                    <div className="existing-review">
+                      <p><strong>Ulasan Pesanan Anda:</strong></p>
+                      {renderStars(orderReviews[selectedOrder.id].rating)}
+                      <p>"{orderReviews[selectedOrder.id].ulasan}"</p>
+                      <button 
+                        onClick={() => handleReviewOrder(selectedOrder)}
+                        className="edit-review-button"
+                      >
+                        Edit Ulasan
+                      </button>
+                    </div>
+                  ) : (
+                    <button 
+                      onClick={() => handleReviewOrder(selectedOrder)}
+                      className="review-button"
+                    >
+                      ⭐ Beri Ulasan Pesanan
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -457,12 +461,12 @@ const Orders = () => {
       )}
 
       {/* Review Modal */}
-      {showReviewModal && selectedProduct && (
+      {showReviewModal && selectedOrderForReview && (
         <div className="modal-overlay" onClick={() => setShowReviewModal(false)}>
           <div className="modal-content review-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h3>
-                {productReviews[selectedProduct.id] ? 'Edit Ulasan' : 'Beri Ulasan'}
+                {orderReviews[selectedOrderForReview.id] ? 'Edit Ulasan Pesanan' : 'Beri Ulasan Pesanan'}
               </h3>
               <button 
                 onClick={() => setShowReviewModal(false)}
@@ -473,26 +477,38 @@ const Orders = () => {
             </div>
 
             <div className="modal-body">
-              <div className="product-info">
-                <h4>{selectedProduct.nama_produk}</h4>
+              <div className="order-review-info">
+                <h4>Pesanan #{selectedOrderForReview.order_number}</h4>
+                <div className="review-order-items">
+                  <p><strong>Produk yang Anda beli:</strong></p>
+                  <div className="products-list">
+                    {selectedOrderForReview.order_items.map(item => (
+                      <div key={item.id} className="product-item">
+                        <span className="product-name">{item.products.nama_produk}</span>
+                        <span className="product-qty">x{item.quantity}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               <div className="rating-section">
-                <label>Rating:</label>
+                <label>Rating Keseluruhan Pesanan:</label>
                 {renderStars(reviewData.rating, (rating) => setReviewData({...reviewData, rating}))}
                 <span className="rating-text">({reviewData.rating} dari 5 bintang)</span>
               </div>
 
               <div className="review-text-section">
-                <label htmlFor="reviewText">Ulasan Anda:</label>
+                <label htmlFor="reviewText">Ulasan Anda untuk pesanan ini:</label>
                 <textarea
                   id="reviewText"
                   value={reviewData.ulasan}
                   onChange={(e) => setReviewData({...reviewData, ulasan: e.target.value})}
-                  placeholder="Bagikan pengalaman Anda dengan produk ini..."
+                  placeholder="Bagikan pengalaman Anda dengan pesanan ini secara keseluruhan (kualitas produk, layanan, pengiriman, dll)..."
                   rows="4"
                   className="review-textarea"
                 />
+                <small>Ulasan ini akan mencakup semua produk dalam pesanan #{selectedOrderForReview.order_number}</small>
               </div>
 
               <div className="review-actions">
@@ -506,13 +522,53 @@ const Orders = () => {
                   onClick={handleSubmitReview}
                   className="submit-review-button"
                 >
-                  {productReviews[selectedProduct.id] ? 'Perbarui Ulasan' : 'Kirim Ulasan'}
+                  {orderReviews[selectedOrderForReview.id] ? 'Perbarui Ulasan' : 'Kirim Ulasan'}
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      <style jsx>{`
+        .order-review-section { margin-top: 10px; }
+        .existing-review { display: flex; align-items: center; gap: 10px; }
+        .review-button, .edit-review-button {
+          padding: 6px 12px; border: none; border-radius: 4px;
+          cursor: pointer; font-size: 14px;
+        }
+        .review-button { background: #10b981; color: white; }
+        .edit-review-button { background: #3b82f6; color: white; }
+        .rating-stars { display: flex; gap: 2px; }
+        .star { cursor: pointer; font-size: 16px; }
+        .star.filled { color: #fbbf24; }
+        .star.clickable:hover { transform: scale(1.1); }
+        .modal-review-section {
+          margin-top: 20px; padding: 15px;
+          background: #f9fafb; border-radius: 8px;
+        }
+        .products-list { margin: 10px 0; }
+        .product-item {
+          display: flex; justify-content: space-between;
+          padding: 5px 0; border-bottom: 1px solid #e5e7eb;
+        }
+        .rating-section { margin: 15px 0; }
+        .rating-text { margin-left: 10px; color: #6b7280; }
+        .review-text-section { margin: 15px 0; }
+        .review-textarea {
+          width: 100%; padding: 10px;
+          border: 1px solid #d1d5db; border-radius: 4px; resize: vertical;
+        }
+        .review-actions { display: flex; gap: 10px; justify-content: flex-end; }
+        .cancel-review-button {
+          padding: 8px 16px; border: 1px solid #d1d5db;
+          background: white; border-radius: 4px; cursor: pointer;
+        }
+        .submit-review-button {
+          padding: 8px 16px; background: #10b981; color: white;
+          border: none; border-radius: 4px; cursor: pointer;
+        }
+      `}</style>
     </div>
   );
 };
