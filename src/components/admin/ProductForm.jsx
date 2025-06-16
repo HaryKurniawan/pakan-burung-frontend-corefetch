@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './ProductForm.css'
 
 const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
@@ -23,6 +23,13 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
     url_foto_1: '',
     url_foto_2: ''
   });
+
+  // Add refs for file inputs
+  const fileInputRefs = {
+    foto_file: useRef(null),
+    foto_file_1: useRef(null),
+    foto_file_2: useRef(null)
+  };
 
   useEffect(() => {
     if (editingProduct) {
@@ -49,6 +56,13 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
         foto_file_1: '',
         foto_file_2: ''
       });
+
+      // Reset file inputs
+      Object.values(fileInputRefs).forEach(ref => {
+        if (ref.current) {
+          ref.current.value = '';
+        }
+      });
     } else {
       setFormData({
         nama_produk: '',
@@ -70,6 +84,13 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
         foto_file: '',
         foto_file_1: '',
         foto_file_2: ''
+      });
+
+      // Reset file inputs
+      Object.values(fileInputRefs).forEach(ref => {
+        if (ref.current) {
+          ref.current.value = '';
+        }
       });
     }
   }, [editingProduct]);
@@ -119,6 +140,13 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
       url_foto: '',
       url_foto_1: '',
       url_foto_2: ''
+    });
+
+    // Reset file inputs after submission
+    Object.values(fileInputRefs).forEach(ref => {
+      if (ref.current) {
+        ref.current.value = '';
+      }
     });
   };
 
@@ -206,6 +234,13 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
       url_foto_1: '',
       url_foto_2: ''
     });
+
+    // Reset file inputs when canceling
+    Object.values(fileInputRefs).forEach(ref => {
+      if (ref.current) {
+        ref.current.value = '';
+      }
+    });
   };
 
   const removeFile = (fileName) => {
@@ -222,6 +257,11 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
       ...prev,
       [fileName]: ''
     }));
+
+    // Reset specific file input
+    if (fileInputRefs[fileName].current) {
+      fileInputRefs[fileName].current.value = '';
+    }
   };
 
   // Cleanup preview URLs when component unmounts
@@ -283,6 +323,7 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
           <div className="photo-upload-item">
             <label>Main Photo:</label>
             <input
+              ref={fileInputRefs.foto_file}
               className="input"
               type="file"
               name="foto_file"
@@ -304,6 +345,7 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
           <div className="photo-upload-item">
             <label>Additional Photo 1:</label>
             <input
+              ref={fileInputRefs.foto_file_1}
               className="input"
               type="file"
               name="foto_file_1"
@@ -325,6 +367,7 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
           <div className="photo-upload-item">
             <label>Additional Photo 2:</label>
             <input
+              ref={fileInputRefs.foto_file_2}
               className="input"
               type="file"
               name="foto_file_2"
