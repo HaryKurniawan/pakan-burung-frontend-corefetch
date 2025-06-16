@@ -12,13 +12,6 @@ const ProductDetail = () => {
   const [jumlah, setJumlah] = useState(1);
   const [reviews, setReviews] = useState([]);
   const [averageRating, setAverageRating] = useState({ average: 0, count: 0 });
-  const [userReview, setUserReview] = useState(null);
-  const [showReviewForm, setShowReviewForm] = useState(false);
-  const [reviewForm, setReviewForm] = useState({ rating: 5, ulasan: '' });
-  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
-  
-  // Get current user from localStorage or context
-  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -32,11 +25,8 @@ const ProductDetail = () => {
     if (id) {
       fetchReviews();
       fetchAverageRating();
-      if (currentUser.id) {
-        fetchUserReview();
-      }
     }
-  }, [id, currentUser.id]);
+  }, [id]);
 
   const fetchReviews = async () => {
     try {
@@ -53,72 +43,6 @@ const ProductDetail = () => {
       setAverageRating(rating);
     } catch (error) {
       console.error('Error fetching average rating:', error);
-    }
-  };
-
-  const fetchUserReview = async () => {
-    try {
-      const review = await reviewsAPI.getUserProductReview(currentUser.id, id);
-      setUserReview(review);
-      if (review) {
-        setReviewForm({ rating: review.rating, ulasan: review.ulasan });
-      }
-    } catch (error) {
-      console.error('Error fetching user review:', error);
-    }
-  };
-
-  const handleSubmitReview = async (e) => {
-    e.preventDefault();
-    if (!currentUser.id) {
-      alert('Silakan login terlebih dahulu untuk memberikan ulasan');
-      return;
-    }
-
-    setIsSubmittingReview(true);
-    try {
-      if (userReview) {
-        // Update existing review
-        await reviewsAPI.updateReview(userReview.id, reviewForm);
-        alert('Ulasan berhasil diperbarui!');
-      } else {
-        // Create new review
-        await reviewsAPI.createReview({
-          user_id: currentUser.id,
-          product_id: parseInt(id),
-          ...reviewForm
-        });
-        alert('Ulasan berhasil ditambahkan!');
-      }
-      
-      // Refresh data
-      await fetchReviews();
-      await fetchAverageRating();
-      await fetchUserReview();
-      setShowReviewForm(false);
-    } catch (error) {
-      console.error('Error submitting review:', error);
-      alert('Gagal menyimpan ulasan');
-    } finally {
-      setIsSubmittingReview(false);
-    }
-  };
-
-  const handleDeleteReview = async () => {
-    if (!userReview || !window.confirm('Yakin ingin menghapus ulasan Anda?')) return;
-
-    try {
-      await reviewsAPI.deleteReview(userReview.id);
-      alert('Ulasan berhasil dihapus');
-      
-      // Refresh data
-      await fetchReviews();
-      await fetchAverageRating();
-      setUserReview(null);
-      setReviewForm({ rating: 5, ulasan: '' });
-    } catch (error) {
-      console.error('Error deleting review:', error);
-      alert('Gagal menghapus ulasan');
     }
   };
 
@@ -272,7 +196,7 @@ const ProductDetail = () => {
         </div>
       </div>
 
-      {/* Reviews Section */}
+      {/* Reviews Section - Display Only */}
       <div style={{ borderTop: '1px solid #eee', paddingTop: '30px' }}>
         <h3>Ulasan Produk</h3>
         
@@ -298,136 +222,6 @@ const ProductDetail = () => {
             </div>
           </div>
         </div>
-
-        {/* User Review Form */}
-        {currentUser.id && (
-          <div style={{ marginBottom: '30px', padding: '20px', border: '1px solid #ddd', borderRadius: '8px' }}>
-            {userReview ? (
-              <div>
-                <h4>Ulasan Anda</h4>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                  {renderStars(userReview.rating)}
-                  <span>({userReview.rating}/5)</span>
-                </div>
-                <p style={{ marginBottom: '10px' }}>{userReview.ulasan}</p>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button 
-                    onClick={() => setShowReviewForm(true)}
-                    style={{ padding: '5px 10px', fontSize: '12px' }}
-                  >
-                    Edit
-                  </button>
-                  <button 
-                    onClick={handleDeleteReview}
-                    style={{ padding: '5px 10px', fontSize: '12px', backgroundColor: '#dc3545', color: 'white' }}
-                  >
-                    Hapus
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <h4>Berikan Ulasan</h4>
-                <button 
-                  onClick={() => setShowReviewForm(true)}
-                  style={{ padding: '10px 20px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px' }}
-                >
-                  Tulis Ulasan
-                </button>
-              </div>
-            )}
-
-            {/* Review Form Modal */}
-            {showReviewForm && (
-              <div style={{ 
-                position: 'fixed', 
-                top: 0, 
-                left: 0, 
-                right: 0, 
-                bottom: 0, 
-                backgroundColor: 'rgba(0,0,0,0.5)', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                zIndex: 1000
-              }}>
-                <div style={{ 
-                  backgroundColor: 'white', 
-                  padding: '30px', 
-                  borderRadius: '8px', 
-                  width: '90%', 
-                  maxWidth: '500px',
-                  maxHeight: '80vh',
-                  overflow: 'auto'
-                }}>
-                  <h4>{userReview ? 'Edit Ulasan' : 'Tulis Ulasan'}</h4>
-                  <form onSubmit={handleSubmitReview}>
-                    <div style={{ marginBottom: '15px' }}>
-                      <label style={{ display: 'block', marginBottom: '5px' }}>Rating:</label>
-                      <div style={{ display: 'flex', gap: '5px' }}>
-                        {[1, 2, 3, 4, 5].map(star => (
-                          <button
-                            key={star}
-                            type="button"
-                            onClick={() => setReviewForm(prev => ({ ...prev, rating: star }))}
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              fontSize: '24px',
-                              color: star <= reviewForm.rating ? '#ffd700' : '#ddd',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            ★
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    <div style={{ marginBottom: '15px' }}>
-                      <label style={{ display: 'block', marginBottom: '5px' }}>Ulasan:</label>
-                      <textarea
-                        value={reviewForm.ulasan}
-                        onChange={(e) => setReviewForm(prev => ({ ...prev, ulasan: e.target.value }))}
-                        required
-                        rows={4}
-                        style={{ 
-                          width: '100%', 
-                          padding: '8px', 
-                          border: '1px solid #ddd', 
-                          borderRadius: '4px',
-                          resize: 'vertical'
-                        }}
-                        placeholder="Tulis ulasan Anda tentang produk ini..."
-                      />
-                    </div>
-                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
-                      <button
-                        type="button"
-                        onClick={() => setShowReviewForm(false)}
-                        style={{ padding: '8px 16px', border: '1px solid #ddd', borderRadius: '4px' }}
-                      >
-                        Batal
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={isSubmittingReview}
-                        style={{ 
-                          padding: '8px 16px', 
-                          backgroundColor: '#007bff', 
-                          color: 'white', 
-                          border: 'none', 
-                          borderRadius: '4px' 
-                        }}
-                      >
-                        {isSubmittingReview ? 'Menyimpan...' : 'Simpan'}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Reviews List */}
         <div>
