@@ -82,6 +82,37 @@ export const CartProvider = ({ children }) => {
     }
   };
 
+  // ✅ FUNGSI BARU: Update quantity item di cart
+  const updateQuantity = async (cartItemId, newQuantity) => {
+    if (newQuantity <= 0) {
+      // Jika quantity 0 atau kurang, hapus item
+      await removeFromCart(cartItemId);
+      return;
+    }
+
+    try {
+      // Optimistic update
+      setCart(prevCart => 
+        prevCart.map(item => 
+          item.id === cartItemId 
+            ? { ...item, jumlah: newQuantity }
+            : item
+        )
+      );
+
+      // Update backend
+      await cartAPI.updateQuantity(cartItemId, newQuantity);
+      
+      // Refresh to ensure consistency
+      await fetchCart();
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+      // Revert on error
+      await fetchCart();
+      alert('Error updating quantity: ' + (error.response?.data?.message || error.message));
+    }
+  };
+
   const removeFromCart = async (cartItemId) => {
     try {
       // Optimistic update
@@ -133,6 +164,7 @@ export const CartProvider = ({ children }) => {
     removeFromCart,
     clearCart,
     fetchCart,
+    updateQuantity, // ✅ TAMBAH FUNGSI BARU
     totalAmount,
     cartCount // Now returns number of unique products
   };

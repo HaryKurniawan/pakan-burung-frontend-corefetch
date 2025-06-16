@@ -771,6 +771,13 @@ export const cartAPI = {
     }
   },
 
+  // ✅ FUNGSI BARU: Update quantity item tertentu
+  updateQuantity: async (cartItemId, newQuantity) => {
+    await api.patch(`/cart_items?id=eq.${cartItemId}`, {
+      jumlah: newQuantity
+    });
+  },
+
   removeFromCart: async (cartItemId) => {
     await api.delete(`/cart_items?id=eq.${cartItemId}`);
   },

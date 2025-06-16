@@ -6,7 +6,7 @@ import CartSummary from '../components/cart/CartSummary';
 import './Cart.css'; // ✅ import CSS baru
 
 const Cart = () => {
-  const { cart, removeFromCart, totalAmount } = useCart();
+  const { cart, removeFromCart, updateQuantity, totalAmount } = useCart(); // ✅ TAMBAH updateQuantity
   const navigate = useNavigate();
 
   const handleNavigateToCheckout = () => {
@@ -34,6 +34,7 @@ const Cart = () => {
                 key={item.id} 
                 item={item} 
                 onRemove={removeFromCart}
+                onUpdateQuantity={updateQuantity} // ✅ PASS FUNGSI updateQuantity
               />
             ))}
           </div>
