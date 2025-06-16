@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
@@ -12,6 +13,107 @@ const api = axios.create({
     'Prefer': 'return=representation'
   }
 });
+
+// Storage API for file uploads
+
+// Create Supabase client
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// Storage API using Supabase client - RECOMMENDED APPROACH
+export const storageAPI = {
+  // Upload file to Supabase Storage
+  uploadFile: async (file, fileName) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('product-photos')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (error) {
+        console.error('Supabase upload error:', error);
+        throw new Error(`Upload failed: ${error.message}`);
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-photos')
+        .getPublicUrl(fileName);
+
+      return { 
+        success: true, 
+        url: publicUrl, 
+        path: fileName,
+        data: data 
+      };
+    } catch (error) {
+      console.error('Upload error:', error);
+      throw error;
+    }
+  },
+
+  // Delete file from Supabase Storage
+  deleteFile: async (fileName) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('product-photos')
+        .remove([fileName]);
+
+      if (error) {
+        console.error('Supabase delete error:', error);
+        throw new Error(`Delete failed: ${error.message}`);
+      }
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Delete error:', error);
+      throw error;
+    }
+  },
+
+  // Generate unique filename
+  generateFileName: (originalName, productId = null) => {
+    const timestamp = Date.now();
+    const randomStr = Math.random().toString(36).substring(2, 8);
+    const extension = originalName.split('.').pop();
+    const baseName = originalName.split('.')[0].replace(/[^a-zA-Z0-9]/g, '');
+    
+    if (productId) {
+      return `product_${productId}_${timestamp}_${randomStr}.${extension}`;
+    }
+    
+    return `${baseName}_${timestamp}_${randomStr}.${extension}`;
+  },
+
+  // Get file path from URL
+  getFilePathFromUrl: (url) => {
+    if (!url) return null;
+    const publicUrlBase = `${supabaseUrl}/storage/v1/object/public/product-photos/`;
+    return url.replace(publicUrlBase, '');
+  },
+
+  // List files in bucket (bonus utility)
+  listFiles: async () => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('product-photos')
+        .list('', {
+          limit: 100,
+          offset: 0
+        });
+
+      if (error) {
+        throw new Error(`List failed: ${error.message}`);
+      }
+
+      return data;
+    } catch (error) {
+      console.error('List error:', error);
+      throw error;
+    }
+  }
+};
 
 // Auth API
 export const authAPI = {
@@ -90,10 +192,7 @@ export const addressAPI = {
   }
 };
 
-
-// Tambahkan ini ke file api.js Anda
-
-/// Orders API with stock restoration on cancellation
+// Orders API with stock restoration on cancellation
 export const ordersAPI = {
   // Create new order
   createOrder: async (orderData) => {
@@ -327,7 +426,7 @@ export const reviewsAPI = {
   }
 };
 
-// Products API
+// Products API with file upload support
 export const productsAPI = {
   getAll: async () => {
     const response = await api.get('/products?select=*,product_photos(*)&order=id.asc');
@@ -335,65 +434,148 @@ export const productsAPI = {
   },
 
   create: async (productData) => {
-    // Extract photo data from productData
-    const { url_foto, url_foto_1, url_foto_2, ...productFields } = productData;
-    
-    // Create the product first
-    const productResponse = await api.post('/products', productFields);
-    const newProduct = productResponse.data[0];
+    try {
+      // Extract file data from productData
+      const { foto_file, foto_file_1, foto_file_2, ...productFields } = productData;
+      
+      // Create the product first
+      const productResponse = await api.post('/products', productFields);
+      const newProduct = productResponse.data[0];
 
-    // If there are photo URLs, create the product_photos record
-    if (url_foto || url_foto_1 || url_foto_2) {
+      // Upload photos if they exist
       const photoData = {
         product_id: newProduct.id,
-        url_foto: url_foto || null,
-        url_foto_1: url_foto_1 || null,
-        url_foto_2: url_foto_2 || null
+        url_foto: '',
+        url_foto_1: '',
+        url_foto_2: ''
       };
 
-      await api.post('/product_photos', photoData);
-    }
+      // Upload main photo
+      if (foto_file) {
+        const fileName = storageAPI.generateFileName(foto_file.name, newProduct.id);
+        const uploadResult = await storageAPI.uploadFile(foto_file, fileName);
+        if (uploadResult.success) {
+          photoData.url_foto = uploadResult.url;
+        }
+      }
 
-    return newProduct;
+      // Upload additional photo 1
+      if (foto_file_1) {
+        const fileName = storageAPI.generateFileName(foto_file_1.name, newProduct.id);
+        const uploadResult = await storageAPI.uploadFile(foto_file_1, fileName);
+        if (uploadResult.success) {
+          photoData.url_foto_1 = uploadResult.url;
+        }
+      }
+
+      // Upload additional photo 2
+      if (foto_file_2) {
+        const fileName = storageAPI.generateFileName(foto_file_2.name, newProduct.id);
+        const uploadResult = await storageAPI.uploadFile(foto_file_2, fileName);
+        if (uploadResult.success) {
+          photoData.url_foto_2 = uploadResult.url;
+        }
+      }
+
+      // Create photo record if any photos were uploaded
+      if (photoData.url_foto || photoData.url_foto_1 || photoData.url_foto_2) {
+        await api.post('/product_photos', photoData);
+      }
+
+      return newProduct;
+    } catch (error) {
+      console.error('Error creating product:', error);
+      throw error;
+    }
   },
 
   update: async (productId, productData) => {
     try {
-      // Extract photo data from productData
-      const { url_foto, url_foto_1, url_foto_2, ...productFields } = productData;
+      // Extract file data from productData
+      const { foto_file, foto_file_1, foto_file_2, ...productFields } = productData;
       
       console.log('Updating product:', productId, productFields);
-      console.log('Photo data:', { url_foto, url_foto_1, url_foto_2 });
       
       // Update the product first
       const productResponse = await api.patch(`/products?id=eq.${productId}`, productFields);
       console.log('Product updated:', productResponse);
       
-      // Handle photo updates - always try to update photos
-      // Check if product_photos record exists
+      // Get existing photo record
       const existingPhotosResponse = await api.get(`/product_photos?product_id=eq.${productId}`);
-      console.log('Existing photos:', existingPhotosResponse.data);
+      const existingPhotos = existingPhotosResponse.data[0];
       
+      // Prepare photo data
       const photoData = {
-        url_foto: url_foto || '',
-        url_foto_1: url_foto_1 || '',
-        url_foto_2: url_foto_2 || ''
+        url_foto: existingPhotos?.url_foto || '',
+        url_foto_1: existingPhotos?.url_foto_1 || '',
+        url_foto_2: existingPhotos?.url_foto_2 || ''
       };
 
-      if (existingPhotosResponse.data && existingPhotosResponse.data.length > 0) {
+      // Handle main photo upload
+      if (foto_file) {
+        // Delete old photo if exists
+        if (existingPhotos?.url_foto) {
+          const oldFileName = storageAPI.getFilePathFromUrl(existingPhotos.url_foto);
+          if (oldFileName) {
+            await storageAPI.deleteFile(oldFileName);
+          }
+        }
+        
+        // Upload new photo
+        const fileName = storageAPI.generateFileName(foto_file.name, productId);
+        const uploadResult = await storageAPI.uploadFile(foto_file, fileName);
+        if (uploadResult.success) {
+          photoData.url_foto = uploadResult.url;
+        }
+      }
+
+      // Handle additional photo 1
+      if (foto_file_1) {
+        // Delete old photo if exists
+        if (existingPhotos?.url_foto_1) {
+          const oldFileName = storageAPI.getFilePathFromUrl(existingPhotos.url_foto_1);
+          if (oldFileName) {
+            await storageAPI.deleteFile(oldFileName);
+          }
+        }
+        
+        // Upload new photo
+        const fileName = storageAPI.generateFileName(foto_file_1.name, productId);
+        const uploadResult = await storageAPI.uploadFile(foto_file_1, fileName);
+        if (uploadResult.success) {
+          photoData.url_foto_1 = uploadResult.url;
+        }
+      }
+
+      // Handle additional photo 2
+      if (foto_file_2) {
+        // Delete old photo if exists
+        if (existingPhotos?.url_foto_2) {
+          const oldFileName = storageAPI.getFilePathFromUrl(existingPhotos.url_foto_2);
+          if (oldFileName) {
+            await storageAPI.deleteFile(oldFileName);
+          }
+        }
+        
+        // Upload new photo
+        const fileName = storageAPI.generateFileName(foto_file_2.name, productId);
+        const uploadResult = await storageAPI.uploadFile(foto_file_2, fileName);
+        if (uploadResult.success) {
+          photoData.url_foto_2 = uploadResult.url;
+        }
+      }
+
+      // Update or create photo record
+      if (existingPhotos) {
         // Update existing photo record
-        console.log('Updating existing photos with:', photoData);
-        const photoUpdateResponse = await api.patch(`/product_photos?product_id=eq.${productId}`, photoData);
-        console.log('Photos updated:', photoUpdateResponse);
-      } else {
+        await api.patch(`/product_photos?product_id=eq.${productId}`, photoData);
+      } else if (photoData.url_foto || photoData.url_foto_1 || photoData.url_foto_2) {
         // Create new photo record
-        console.log('Creating new photo record');
         const newPhotoData = {
           product_id: productId,
           ...photoData
         };
-        const photoCreateResponse = await api.post('/product_photos', newPhotoData);
-        console.log('Photos created:', photoCreateResponse);
+        await api.post('/product_photos', newPhotoData);
       }
 
       return productResponse.data?.[0] || productResponse.data;
@@ -404,10 +586,36 @@ export const productsAPI = {
   },
 
   delete: async (productId) => {
-    // Delete related photos first (if any)
-    await api.delete(`/product_photos?product_id=eq.${productId}`);
-    // Then delete the product
-    await api.delete(`/products?id=eq.${productId}`);
+    try {
+      // Get existing photos to delete from storage
+      const existingPhotosResponse = await api.get(`/product_photos?product_id=eq.${productId}`);
+      const existingPhotos = existingPhotosResponse.data[0];
+      
+      // Delete photos from storage
+      if (existingPhotos) {
+        if (existingPhotos.url_foto) {
+          const fileName = storageAPI.getFilePathFromUrl(existingPhotos.url_foto);
+          if (fileName) await storageAPI.deleteFile(fileName);
+        }
+        if (existingPhotos.url_foto_1) {
+          const fileName = storageAPI.getFilePathFromUrl(existingPhotos.url_foto_1);
+          if (fileName) await storageAPI.deleteFile(fileName);
+        }
+        if (existingPhotos.url_foto_2) {
+          const fileName = storageAPI.getFilePathFromUrl(existingPhotos.url_foto_2);
+          if (fileName) await storageAPI.deleteFile(fileName);
+        }
+      }
+      
+      // Delete related photos record
+      await api.delete(`/product_photos?product_id=eq.${productId}`);
+      
+      // Then delete the product
+      await api.delete(`/products?id=eq.${productId}`);
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      throw error;
+    }
   },
 
   updateStock: async (productId, newStock) => {

@@ -7,6 +7,18 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
     harga: '',
     stok: '',
     detail_produk: '',
+    foto_file: null,
+    foto_file_1: null,
+    foto_file_2: null
+  });
+
+  const [previewUrls, setPreviewUrls] = useState({
+    foto_file: '',
+    foto_file_1: '',
+    foto_file_2: ''
+  });
+
+  const [existingPhotos, setExistingPhotos] = useState({
     url_foto: '',
     url_foto_1: '',
     url_foto_2: ''
@@ -19,9 +31,23 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
         harga: editingProduct.harga.toString(),
         stok: editingProduct.stok.toString(),
         detail_produk: editingProduct.detail_produk,
+        foto_file: null,
+        foto_file_1: null,
+        foto_file_2: null
+      });
+
+      // Set existing photos for display
+      setExistingPhotos({
         url_foto: editingProduct.product_photos?.[0]?.url_foto || '',
         url_foto_1: editingProduct.product_photos?.[0]?.url_foto_1 || '',
         url_foto_2: editingProduct.product_photos?.[0]?.url_foto_2 || ''
+      });
+
+      // Reset preview URLs when editing
+      setPreviewUrls({
+        foto_file: '',
+        foto_file_1: '',
+        foto_file_2: ''
       });
     } else {
       setFormData({
@@ -29,21 +55,67 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
         harga: '',
         stok: '',
         detail_produk: '',
+        foto_file: null,
+        foto_file_1: null,
+        foto_file_2: null
+      });
+      
+      setExistingPhotos({
         url_foto: '',
         url_foto_1: '',
         url_foto_2: ''
+      });
+      
+      setPreviewUrls({
+        foto_file: '',
+        foto_file_1: '',
+        foto_file_2: ''
       });
     }
   }, [editingProduct]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await onSubmit(formData);
+    
+    // Prepare form data for submission
+    const submitData = {
+      nama_produk: formData.nama_produk,
+      harga: parseInt(formData.harga),
+      stok: parseInt(formData.stok),
+      detail_produk: formData.detail_produk
+    };
+
+    // Add file data if files are selected
+    if (formData.foto_file) {
+      submitData.foto_file = formData.foto_file;
+    }
+    if (formData.foto_file_1) {
+      submitData.foto_file_1 = formData.foto_file_1;
+    }
+    if (formData.foto_file_2) {
+      submitData.foto_file_2 = formData.foto_file_2;
+    }
+
+    await onSubmit(submitData);
+    
+    // Reset form after successful submission
     setFormData({
       nama_produk: '',
       harga: '',
       stok: '',
       detail_produk: '',
+      foto_file: null,
+      foto_file_1: null,
+      foto_file_2: null
+    });
+    
+    setPreviewUrls({
+      foto_file: '',
+      foto_file_1: '',
+      foto_file_2: ''
+    });
+    
+    setExistingPhotos({
       url_foto: '',
       url_foto_1: '',
       url_foto_2: ''
@@ -57,22 +129,113 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
     });
   };
 
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    const file = files[0];
+    
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File size must be less than 5MB');
+        return;
+      }
+      
+      // Update form data
+      setFormData({
+        ...formData,
+        [name]: file
+      });
+      
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setPreviewUrls(prev => ({
+        ...prev,
+        [name]: previewUrl
+      }));
+    } else {
+      // File was removed
+      setFormData({
+        ...formData,
+        [name]: null
+      });
+      
+      // Remove preview URL
+      if (previewUrls[name]) {
+        URL.revokeObjectURL(previewUrls[name]);
+      }
+      
+      setPreviewUrls(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+
   const handleCancel = () => {
+    // Cleanup preview URLs
+    Object.values(previewUrls).forEach(url => {
+      if (url) URL.revokeObjectURL(url);
+    });
+    
     onCancelEdit();
+    
     setFormData({
       nama_produk: '',
       harga: '',
       stok: '',
       detail_produk: '',
+      foto_file: null,
+      foto_file_1: null,
+      foto_file_2: null
+    });
+    
+    setPreviewUrls({
+      foto_file: '',
+      foto_file_1: '',
+      foto_file_2: ''
+    });
+    
+    setExistingPhotos({
       url_foto: '',
       url_foto_1: '',
       url_foto_2: ''
     });
   };
 
+  const removeFile = (fileName) => {
+    if (previewUrls[fileName]) {
+      URL.revokeObjectURL(previewUrls[fileName]);
+    }
+    
+    setFormData({
+      ...formData,
+      [fileName]: null
+    });
+    
+    setPreviewUrls(prev => ({
+      ...prev,
+      [fileName]: ''
+    }));
+  };
+
+  // Cleanup preview URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      Object.values(previewUrls).forEach(url => {
+        if (url) URL.revokeObjectURL(url);
+      });
+    };
+  }, []);
+
   return (
     <div>
-      <h3>Add/Edit Product</h3>
+      <h3>{editingProduct ? 'Edit Product' : 'Add New Product'}</h3>
       <form onSubmit={handleSubmit}>
         <input
           className="input"
@@ -90,6 +253,7 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
           placeholder="Price"
           value={formData.harga}
           onChange={handleChange}
+          min="0"
           required
         />
         <input
@@ -99,6 +263,7 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
           placeholder="Stock"
           value={formData.stok}
           onChange={handleChange}
+          min="0"
           required
         />
         <textarea
@@ -110,74 +275,130 @@ const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
           required
         />
         
-        {/* Photo URL Fields */}
+        {/* Photo Upload Fields */}
         <div className="photo-section">
           <h4>Product Photos</h4>
-          <input
-            className="input"
-            type="url"
-            name="url_foto"
-            placeholder="Main Photo URL"
-            value={formData.url_foto}
-            onChange={handleChange}
-          />
-          <input
-            className="input"
-            type="url"
-            name="url_foto_1"
-            placeholder="Additional Photo URL 1"
-            value={formData.url_foto_1}
-            onChange={handleChange}
-          />
-          <input
-            className="input"
-            type="url"
-            name="url_foto_2"
-            placeholder="Additional Photo URL 2"
-            value={formData.url_foto_2}
-            onChange={handleChange}
-          />
+          
+          {/* Main Photo */}
+          <div className="photo-upload-item">
+            <label>Main Photo:</label>
+            <input
+              className="input"
+              type="file"
+              name="foto_file"
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+            {formData.foto_file && (
+              <button 
+                type="button" 
+                className="remove-file-btn"
+                onClick={() => removeFile('foto_file')}
+              >
+                Remove
+              </button>
+            )}
+          </div>
+
+          {/* Additional Photo 1 */}
+          <div className="photo-upload-item">
+            <label>Additional Photo 1:</label>
+            <input
+              className="input"
+              type="file"
+              name="foto_file_1"
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+            {formData.foto_file_1 && (
+              <button 
+                type="button" 
+                className="remove-file-btn"
+                onClick={() => removeFile('foto_file_1')}
+              >
+                Remove
+              </button>
+            )}
+          </div>
+
+          {/* Additional Photo 2 */}
+          <div className="photo-upload-item">
+            <label>Additional Photo 2:</label>
+            <input
+              className="input"
+              type="file"
+              name="foto_file_2"
+              accept="image/*"
+              onChange={handleFileChange}
+            />
+            {formData.foto_file_2 && (
+              <button 
+                type="button" 
+                className="remove-file-btn"
+                onClick={() => removeFile('foto_file_2')}
+              >
+                Remove
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Photo Preview */}
-        {(formData.url_foto || formData.url_foto_1 || formData.url_foto_2) && (
+        {(previewUrls.foto_file || previewUrls.foto_file_1 || previewUrls.foto_file_2 || 
+          existingPhotos.url_foto || existingPhotos.url_foto_1 || existingPhotos.url_foto_2) && (
           <div className="photo-preview">
             <h4>Photo Preview</h4>
             <div className="preview-grid">
-              {formData.url_foto && (
+              {/* Main Photo Preview */}
+              {(previewUrls.foto_file || existingPhotos.url_foto) && (
                 <div className="preview-item">
-                  <img src={formData.url_foto} alt="Main preview" />
-                  <span>Main Photo</span>
+                  <img 
+                    src={previewUrls.foto_file || existingPhotos.url_foto} 
+                    alt="Main preview" 
+                  />
+                  <span>Main Photo {previewUrls.foto_file && '(New)'}</span>
                 </div>
               )}
-              {formData.url_foto_1 && (
+              
+              {/* Additional Photo 1 Preview */}
+              {(previewUrls.foto_file_1 || existingPhotos.url_foto_1) && (
                 <div className="preview-item">
-                  <img src={formData.url_foto_1} alt="Additional preview 1" />
-                  <span>Photo 1</span>
+                  <img 
+                    src={previewUrls.foto_file_1 || existingPhotos.url_foto_1} 
+                    alt="Additional preview 1" 
+                  />
+                  <span>Photo 1 {previewUrls.foto_file_1 && '(New)'}</span>
                 </div>
               )}
-              {formData.url_foto_2 && (
+              
+              {/* Additional Photo 2 Preview */}
+              {(previewUrls.foto_file_2 || existingPhotos.url_foto_2) && (
                 <div className="preview-item">
-                  <img src={formData.url_foto_2} alt="Additional preview 2" />
-                  <span>Photo 2</span>
+                  <img 
+                    src={previewUrls.foto_file_2 || existingPhotos.url_foto_2} 
+                    alt="Additional preview 2" 
+                  />
+                  <span>Photo 2 {previewUrls.foto_file_2 && '(New)'}</span>
                 </div>
               )}
             </div>
           </div>
         )}
 
-        <button className="button" type="submit" disabled={loading}>
-          {loading ? 'Loading...' : editingProduct ? 'Update Product' : 'Add Product'}
-        </button>
-        {editingProduct && (
-          <button 
-            className="button secondary"
-            type="button"
-            onClick={handleCancel}
-          >
-            Cancel Edit
+        <div className="button-group">
+          <button className="button" type="submit" disabled={loading}>
+            {loading ? 'Processing...' : editingProduct ? 'Update Product' : 'Add Product'}
           </button>
-        )}
+          {editingProduct && (
+            <button 
+              className="button secondary"
+              type="button"
+              onClick={handleCancel}
+            >
+              Cancel Edit
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );
