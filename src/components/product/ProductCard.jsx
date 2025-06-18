@@ -1,47 +1,28 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; // gunakan ini untuk navigasi
-// Jika kamu belum pakai react-router-dom, beri tahu saya
+import { useNavigate } from 'react-router-dom';
+import './ProductCard.css'; // Import file CSS terpisah
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/produk/${product.id}`); // arahkan ke halaman detail produk
+    navigate(`/produk/${product.id}`);
   };
 
-  // Ambil foto pertama
   const firstPhoto = product.product_photos?.[0]?.url_foto;
 
   return (
-    <div
-      className="product-card"
-      onClick={handleClick}
-      style={{
-        cursor: 'pointer',
-        border: '1px solid #ddd',
-        padding: '12px',
-        borderRadius: '8px',
-        width: '200px'
-      }}
-    >
-      {/* Foto pertama */}
+    <div className="product-card" onClick={handleClick}>
       {firstPhoto && (
         <img
           src={firstPhoto}
           alt={`Foto ${product.nama_produk}`}
-          style={{
-            width: '100%',
-            height: '150px',
-            objectFit: 'cover',
-            borderRadius: '6px',
-            marginBottom: '8px'
-          }}
+          className="product-image"
         />
       )}
 
-      {/* Info dasar */}
-      <h3 style={{ fontSize: '16px', margin: '4px 0' }}>{product.nama_produk}</h3>
-      <p style={{ fontWeight: 'bold', color: '#444' }}>
+      <h3 className="product-name">{product.nama_produk}</h3>
+      <p className="product-price">
         Rp {Number(product.harga).toLocaleString()}
       </p>
     </div>

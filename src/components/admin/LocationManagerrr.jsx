@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { locationAPI, addressAPI } from '../../services/api';
-import './adminLocation.css'
+import '../styles/adminLocation.css'
 
 const LocationManagerrr = () => {
   const [activeTab, setActiveTab] = useState('provinsi');

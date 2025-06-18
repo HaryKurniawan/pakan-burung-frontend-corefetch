@@ -65,6 +65,24 @@ export const useCart = () => {
     }
   };
 
+  // Add updateQuantity function
+  const updateQuantity = async (cartItemId, newQuantity) => {
+    if (newQuantity < 1) {
+      // If quantity is 0 or less, remove the item
+      await removeFromCart(cartItemId);
+      return;
+    }
+
+    try {
+      // Assuming you have an updateCart API method
+      await cartAPI.updateCartItem(cartItemId, newQuantity);
+      await fetchCart();
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+      alert('Error updating quantity: ' + (error.response?.data?.message || error.message));
+    }
+  };
+
   const clearCart = async () => {
     if (!currentUser) return;
 
@@ -93,6 +111,7 @@ export const useCart = () => {
     loading,
     addToCart,
     removeFromCart,
+    updateQuantity, // Add this to the return object
     clearCart,
     fetchCart,
     totalAmount,

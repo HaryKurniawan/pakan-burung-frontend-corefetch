@@ -1,0 +1,16 @@
+.cart-summary{
+    display: flex;
+    justify-content: space-between;
+}
+.checkout-button{
+    background-color: #2b83ff;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.summary-details{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    font-weight: 500;
+}

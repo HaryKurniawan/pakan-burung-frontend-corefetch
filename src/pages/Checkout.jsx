@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { productsAPI, addressAPI, ordersAPI } from '../services/api';
 import { useCart } from '../hooks/useCart';
+import { useVouchers } from '../hooks/useVouchers';
 import { useProducts } from '../hooks/useProducts';
 import { useAuth } from '../context/AuthContext';
 import './Checkout.css';
@@ -10,8 +11,18 @@ const Checkout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser } = useAuth();
-  const { cartItems, totalAmount } = location.state || {};
+  
+  // Extract voucher data from location state
+  const { 
+    cartItems, 
+    totalAmount, 
+    appliedVoucher, 
+    discountAmount = 0, 
+    finalAmount 
+  } = location.state || {};
+  
   const { clearCart } = useCart();
+  const { applyVoucher } = useVouchers();
   const { fetchProducts } = useProducts();
   const [loading, setLoading] = useState(false);
   const [primaryAddress, setPrimaryAddress] = useState(null);
@@ -61,16 +72,36 @@ const Checkout = () => {
         return { ...item, currentStock: found.stok };
       });
 
-      // Create order
+      // Create order with voucher data
       const orderData = {
         userId: currentUser.id,
-        totalAmount: totalAmount,
+        originalAmount: totalAmount, // Original amount before discount
+        discountAmount: discountAmount, // Discount amount
+        totalAmount: finalAmount || totalAmount, // Final amount after discount
+        voucherId: appliedVoucher?.id || null, // Voucher ID if applied
+        voucherCode: appliedVoucher?.kode_voucher || null, // Voucher code
         shippingAddressId: primaryAddress.id,
         items: cartItems,
         notes: orderNotes
       };
 
       const order = await ordersAPI.createOrder(orderData);
+
+      // Apply voucher usage if voucher was used
+      if (appliedVoucher && discountAmount > 0) {
+        try {
+          await applyVoucher(
+            appliedVoucher.id, 
+            currentUser.id, 
+            order.id, 
+            discountAmount
+          );
+        } catch (voucherError) {
+          console.error('Error applying voucher:', voucherError);
+          // Don't fail the entire checkout if voucher application fails
+          // The order is already created, just log the error
+        }
+      }
 
       // Update stok satu per satu
       for (const item of checks) {
@@ -81,11 +112,22 @@ const Checkout = () => {
       await clearCart();
       await fetchProducts();
 
-      alert(`Pesanan berhasil dibuat! 
-Order Number: ${order.order_number}
-Total: Rp ${totalAmount.toLocaleString()}
+      // Show success message with voucher info
+      let successMessage = `Pesanan berhasil dibuat! 
+Order Number: ${order.order_number}`;
+
+      if (appliedVoucher && discountAmount > 0) {
+        successMessage += `
+Subtotal: Rp ${totalAmount.toLocaleString()}
+Diskon (${appliedVoucher.kode_voucher}): -Rp ${discountAmount.toLocaleString()}`;
+      }
+
+      successMessage += `
+Total: Rp ${(finalAmount || totalAmount).toLocaleString()}
 Pesanan akan dikirim ke: ${primaryAddress.alamat_lengkap}
-Status: Menunggu konfirmasi`);
+Status: Menunggu konfirmasi`;
+
+      alert(successMessage);
       
       navigate('/orders');
     } catch (err) {
@@ -197,6 +239,28 @@ Status: Menunggu konfirmasi`);
           </div>
         ))}
         
+        {/* Voucher Section - Show if voucher is applied */}
+        {appliedVoucher && discountAmount > 0 && (
+          <div className="applied-voucher-checkout">
+            <div className="voucher-checkout-header">
+              <h4 className="voucher-checkout-title">🎟️ Voucher Diterapkan</h4>
+            </div>
+            <div className="voucher-checkout-details">
+              <div className="voucher-checkout-info">
+                <p className="voucher-checkout-name">{appliedVoucher.nama_voucher}</p>
+                <p className="voucher-checkout-code">Kode: {appliedVoucher.kode_voucher}</p>
+                <p className="voucher-checkout-description">{appliedVoucher.deskripsi}</p>
+              </div>
+              <div className="voucher-checkout-discount">
+                <span className="discount-label">Diskon:</span>
+                <span className="discount-value">
+                  -Rp {discountAmount.toLocaleString()}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+        
         {/* Catatan Pesanan */}
         <div className="order-notes-section">
           <label htmlFor="orderNotes" className="notes-label">
@@ -212,11 +276,38 @@ Status: Menunggu konfirmasi`);
           />
         </div>
         
-        <div className="total-section">
-          <h3 className="total-label">Total Pembayaran:</h3>
-          <h3 className="total-amount">
-            Rp {Number(totalAmount).toLocaleString()}
-          </h3>
+        {/* Order Summary */}
+        <div className="order-summary-section">
+          <div className="summary-row">
+            <span className="summary-label">Subtotal:</span>
+            <span className="summary-value">
+              Rp {Number(totalAmount).toLocaleString()}
+            </span>
+          </div>
+          
+          {appliedVoucher && discountAmount > 0 && (
+            <div className="summary-row discount-summary-row">
+              <span className="summary-label discount-label">
+                Diskon ({appliedVoucher.kode_voucher}):
+              </span>
+              <span className="summary-value discount-value">
+                -Rp {discountAmount.toLocaleString()}
+              </span>
+            </div>
+          )}
+          
+          <div className="summary-row total-summary-row">
+            <span className="summary-label total-label">Total Pembayaran:</span>
+            <span className="summary-value total-value">
+              Rp {(finalAmount || totalAmount).toLocaleString()}
+            </span>
+          </div>
+          
+          {appliedVoucher && discountAmount > 0 && (
+            <div className="savings-notice">
+              <small>🎉 Anda menghemat Rp {discountAmount.toLocaleString()}!</small>
+            </div>
+          )}
         </div>
       </div>
 

@@ -1,15 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+
+*{
+  font-family: 'Poppins', sans-serif;
+}
+
 #root {
   width: 100%;
   height: 100vh;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
+  max-width: 1200px;
+  padding: 0px 40px;
 }
 
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f1f5f9; /* slate-100 */
-  color: #7b7b7b; /* slate-800 */
-}
 
 

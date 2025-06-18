@@ -1,6 +1,6 @@
 import React from 'react';
 import ProductCard from './ProductCard';
-import  './ProductCard.css'
+import  './ProductList.css'
 
 const ProductList = ({ products }) => {
   if (!products || products.length === 0) {

@@ -4,6 +4,7 @@ import ProductForm from '../../components/admin/ProductForm';
 import AdminProductList from '../../components/admin/AdminProductList';
 import OrderStatusManager from '../../components/admin/OrderStatusManager';
 import LocationManagerrr from '../../components/admin/LocationManagerrr';
+import VoucherManager from '../../components/admin/VoucherManager';
 import './admin.css'
 
 const AdminPanel = () => {
@@ -64,7 +65,7 @@ const AdminPanel = () => {
 
   return (
     <div className="admin-panel">
-
+      {/* Komponen Kelola Produk */}
       <ProductForm 
         onSubmit={handleProductSubmit}
         editingProduct={editingProduct}
@@ -77,9 +78,15 @@ const AdminPanel = () => {
         onEdit={handleEditProduct}
         onDelete={handleDeleteProduct}
       />
-<LocationManagerrr />
-        {/* Komponen Kelola Status Pesanan */}
+
+      {/* Komponen Kelola Lokasi */}
+      <LocationManagerrr />
+      
+      {/* Komponen Kelola Status Pesanan */}
       <OrderStatusManager />
+      
+      {/* Komponen Kelola Voucher */}
+      <VoucherManager />
     </div>
   );
 };

@@ -1,18 +1,17 @@
-/* Navbar.css */
-
 .nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #1e293b; /* slate-800 */
-  padding: 1rem 2rem;
+  background-color: #ffffff; /* slate-800 */
+  height: 80px;
+  padding: 0px;  
   color: white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  color: rgb(0, 0, 0);
+  padding: 0px 20px;
 }
 
-.nav h1 {
-  font-size: 1.5rem;
-  font-weight: bold;
+.nav h3 {
+font-weight: 500;
 }
 
 .nav .button {
@@ -23,6 +22,8 @@
   border-radius: 6px;
   text-decoration: none;
   transition: background-color 0.2s ease;
+  font-weight: 500;
+  font-size: 14px;
 }
 
 .nav .button:hover {

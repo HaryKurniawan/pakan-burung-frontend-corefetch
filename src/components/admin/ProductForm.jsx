@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import './ProductForm.css'
+import '../styles/ProductForm.css'
 
 const ProductForm = ({ onSubmit, editingProduct, onCancelEdit, loading }) => {
   const [formData, setFormData] = useState({

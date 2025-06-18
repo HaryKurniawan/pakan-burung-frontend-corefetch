@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './OrderStatusManager.css'
+import '../styles/OrderStatusManager.css'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;

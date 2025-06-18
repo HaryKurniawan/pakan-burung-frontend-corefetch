@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './AdminProductList.css';
+import '../styles/AdminProductList.css';
 
 const AdminProductList = ({ products, onEdit, onDelete }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState({});
