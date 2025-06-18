@@ -11,7 +11,6 @@ const Home = () => {
 
   return (
     <div>
-      <h2>Products</h2>
       <ProductList products={products} />
     </div>
   );

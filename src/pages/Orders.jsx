@@ -2,17 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ordersAPI, reviewsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import './Orders.css';
+import './orders.css'
 
 const Orders = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedOrder, setSelectedOrder] = useState(null);
-  const [trackingHistory, setTrackingHistory] = useState([]);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const [cancelReason, setCancelReason] = useState('');
+  const [activeTab, setActiveTab] = useState('active'); // 'active' or 'completed'
   
   // Review states
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -60,14 +60,36 @@ const Orders = () => {
     }
   };
 
-  const handleViewDetails = async (order) => {
-    setSelectedOrder(order);
-    try {
-      const tracking = await ordersAPI.getOrderTracking(order.id);
-      setTrackingHistory(tracking);
-    } catch (error) {
-      console.error('Error loading tracking:', error);
+  // Filter orders based on active tab
+  const getFilteredOrders = () => {
+    if (activeTab === 'active') {
+      // Pesanan aktif: pending, confirmed, processing, shipped
+      return orders.filter(order => 
+        ['pending', 'confirmed', 'processing', 'shipped'].includes(order.order_status.nama)
+      );
+    } else {
+      // Pesanan selesai: delivered, cancelled
+      return orders.filter(order => 
+        ['delivered', 'cancelled'].includes(order.order_status.nama)
+      );
     }
+  };
+
+  const getOrderCount = (type) => {
+    if (type === 'active') {
+      return orders.filter(order => 
+        ['pending', 'confirmed', 'processing', 'shipped'].includes(order.order_status.nama)
+      ).length;
+    } else {
+      return orders.filter(order => 
+        ['delivered', 'cancelled'].includes(order.order_status.nama)
+      ).length;
+    }
+  };
+
+  const handleViewDetails = (order) => {
+    // Navigate to order detail page with order data in state
+    navigate('/order-detail', { state: { order } });
   };
 
   const handleCancelOrder = async () => {
@@ -203,214 +225,133 @@ const Orders = () => {
     );
   }
 
+  const filteredOrders = getFilteredOrders();
+
   return (
     <div className="orders-container">
-      <div className="orders-header">
-        <h2>📋 Pesanan Saya</h2>
-        <button 
-          onClick={() => navigate('/')}
-          className="back-button"
+      {/* Tab Navigation */}
+      <div className="orders-tabs">
+        <button
+          className={`tab-button ${activeTab === 'active' ? 'active' : ''}`}
+          onClick={() => setActiveTab('active')}
         >
-          ← Kembali ke Beranda
+          Pesanan Aktif
+          {getOrderCount('active') > 0 && (
+            <span className="tab-badge">{getOrderCount('active')}</span>
+          )}
+        </button>
+        <button
+          className={`tab-button ${activeTab === 'completed' ? 'active' : ''}`}
+          onClick={() => setActiveTab('completed')}
+        >
+          Pesanan Selesai
+          {getOrderCount('completed') > 0 && (
+            <span className="tab-badge">{getOrderCount('completed')}</span>
+          )}
         </button>
       </div>
 
-      {orders.length === 0 ? (
-        <div className="no-orders">
-          <p>Belum ada pesanan</p>
-          <button 
-            onClick={() => navigate('/')}
-            className="shop-now-button"
-          >
-            Mulai Belanja
-          </button>
-        </div>
-      ) : (
-        <div className="orders-list">
-          {orders.map(order => (
-            <div key={order.id} className="order-card">
-              <div className="order-header">
-                <div className="order-info">
-                  <h3 className="order-number">{order.order_number}</h3>
-                  <p className="order-date">
-                    {new Date(order.created_at).toLocaleDateString('id-ID', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </p>
-                </div>
-                <div 
-                  className="order-status"
-                  style={{ backgroundColor: getStatusColor(order.order_status.nama) }}
+      {/* Tab Content */}
+      <div className="tab-content">
+        {filteredOrders.length === 0 ? (
+          <div className="no-orders">
+            {activeTab === 'active' ? (
+              <>
+                <p>Tidak ada pesanan aktif</p>
+                <p className="no-orders-subtitle">Pesanan yang sedang diproses akan muncul di sini</p>
+                <button 
+                  onClick={() => navigate('/')}
+                  className="shop-now-button"
                 >
-                  {getStatusIcon(order.order_status.nama)} {order.order_status.deskripsi}
-                </div>
-              </div>
-
-              <div className="order-items">
-                {order.order_items.map(item => (
-                  <div key={item.id} className="order-item">
-                    <div className="item-info">
-                      <span className="item-name">{item.products.nama_produk}</span>
-                      <span className="item-quantity">x{item.quantity}</span>
-                      <span className="item-price">
-                        Rp {Number(item.subtotal).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="order-footer">
-                <div className="order-total">
-                  <strong>Total: Rp {Number(order.total_amount).toLocaleString()}</strong>
-                </div>
-                <div className="order-actions">
-                  <button 
-                    onClick={() => handleViewDetails(order)}
-                    className="view-details-button"
+                  Mulai Belanja
+                </button>
+              </>
+            ) : (
+              <>
+                <p>Tidak ada pesanan selesai</p>
+                <p className="no-orders-subtitle">Pesanan yang sudah selesai atau dibatalkan akan muncul di sini</p>
+              </>
+            )}
+          </div>
+        ) : (
+          <div className="orders-list">
+            {filteredOrders.map(order => (
+              <div key={order.id} className="order-card">
+                <div className="order-header">
+                 
+                  <div 
+                    className="order-status"
+                    style={{ backgroundColor: getStatusColor(order.order_status.nama) }}
                   >
-                    Lihat Detail
-                  </button>
-                  {canCancelOrder(order.order_status.nama) && (
+                    {getStatusIcon(order.order_status.nama)} {order.order_status.deskripsi}
+                  </div>
+                </div>
+
+                <div className="order-items">
+                  {order.order_items.map(item => (
+                    <div key={item.id} className="order-item">
+                      <div className="item-info">
+                        <span className="item-name">{item.products.nama_produk}</span>
+                        <span className="item-quantity">x{item.quantity}</span>
+                        <span className="item-price">
+                          Rp {Number(item.subtotal).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="order-footer">
+                  <div className="order-total">
+                    <strong>Total: Rp {Number(order.total_amount).toLocaleString()}</strong>
+                  </div>
+                  <div className="order-actions">
                     <button 
-                      onClick={() => {
-                        setSelectedOrder(order);
-                        setShowCancelModal(true);
-                      }}
-                      className="cancel-button"
+                      onClick={() => handleViewDetails(order)}
+                      className="view-details-button"
                     >
-                      Batalkan
+                      Lihat Detail
                     </button>
-                  )}
-                  {canReviewOrder(order.order_status.nama) && (
-                    <div className="order-review-section">
-                      {orderReviews[order.id] ? (
-                        <div className="existing-review">
-                          {renderStars(orderReviews[order.id].rating)}
+                    {canCancelOrder(order.order_status.nama) && (
+                      <button 
+                        onClick={() => {
+                          setSelectedOrder(order);
+                          setShowCancelModal(true);
+                        }}
+                        className="cancel-button"
+                      >
+                        Batalkan
+                      </button>
+                    )}
+                    {canReviewOrder(order.order_status.nama) && (
+                      <div className="order-review-section">
+                        {orderReviews[order.id] ? (
+                          <div className="existing-review">
+                            {renderStars(orderReviews[order.id].rating)}
+                            <button 
+                              onClick={() => handleReviewOrder(order)}
+                              className="edit-review-button"
+                            >
+                              Edit Ulasan
+                            </button>
+                          </div>
+                        ) : (
                           <button 
                             onClick={() => handleReviewOrder(order)}
-                            className="edit-review-button"
+                            className="review-button"
                           >
-                            Edit Ulasan
+                            ⭐ Beri Ulasan
                           </button>
-                        </div>
-                      ) : (
-                        <button 
-                          onClick={() => handleReviewOrder(order)}
-                          className="review-button"
-                        >
-                          ⭐ Beri Ulasan
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Order Details Modal */}
-      {selectedOrder && !showCancelModal && (
-        <div className="modal-overlay" onClick={() => setSelectedOrder(null)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Detail Pesanan {selectedOrder.order_number}</h3>
-              <button 
-                onClick={() => setSelectedOrder(null)}
-                className="close-button"
-              >
-                ×
-              </button>
-            </div>
-
-            <div className="modal-body">
-              <div className="order-details-section">
-                <h4>🛒 Item Pesanan</h4>
-                {selectedOrder.order_items.map(item => (
-                  <div key={item.id} className="detail-item">
-                    <div className="item-details">
-                      <span>{item.products.nama_produk}</span>
-                      <span>{item.quantity} × Rp {Number(item.price).toLocaleString()}</span>
-                      <strong>Rp {Number(item.subtotal).toLocaleString()}</strong>
-                    </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
-
-              <div className="shipping-details-section">
-                <h4>📍 Alamat Pengiriman</h4>
-                <p>{selectedOrder.user_addresses.alamat_lengkap}</p>
-                <p>{selectedOrder.user_addresses.nama_desa}, RT {selectedOrder.user_addresses.rt}/RW {selectedOrder.user_addresses.rw}</p>
-                <p>{selectedOrder.user_addresses.kecamatan?.nama}, {selectedOrder.user_addresses.kota_kabupaten?.nama}</p>
-                <p>{selectedOrder.user_addresses.provinsi?.nama}</p>
-              </div>
-
-              {selectedOrder.notes && (
-                <div className="notes-section">
-                  <h4>📝 Catatan</h4>
-                  <p>{selectedOrder.notes}</p>
                 </div>
-              )}
-
-              <div className="tracking-section">
-                <h4>📦 Riwayat Status</h4>
-                {trackingHistory.map(track => (
-                  <div key={track.id} className="tracking-item">
-                    <div className="tracking-status">
-                      {getStatusIcon(track.order_status.nama)} {track.order_status.deskripsi}
-                    </div>
-                    <div className="tracking-time">
-                      {new Date(track.created_at).toLocaleDateString('id-ID', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </div>
-                    {track.notes && <div className="tracking-notes">{track.notes}</div>}
-                  </div>
-                ))}
               </div>
-
-              <div className="total-section">
-                <h3>Total: Rp {Number(selectedOrder.total_amount).toLocaleString()}</h3>
-              </div>
-
-              {canReviewOrder(selectedOrder.order_status.nama) && (
-                <div className="modal-review-section">
-                  {orderReviews[selectedOrder.id] ? (
-                    <div className="existing-review">
-                      <p><strong>Ulasan Pesanan Anda:</strong></p>
-                      {renderStars(orderReviews[selectedOrder.id].rating)}
-                      <p>"{orderReviews[selectedOrder.id].ulasan}"</p>
-                      <button 
-                        onClick={() => handleReviewOrder(selectedOrder)}
-                        className="edit-review-button"
-                      >
-                        Edit Ulasan
-                      </button>
-                    </div>
-                  ) : (
-                    <button 
-                      onClick={() => handleReviewOrder(selectedOrder)}
-                      className="review-button"
-                    >
-                      ⭐ Beri Ulasan Pesanan
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
+            ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Cancel Order Modal */}
       {showCancelModal && (
@@ -529,46 +470,6 @@ const Orders = () => {
           </div>
         </div>
       )}
-
-      <style jsx>{`
-        .order-review-section { margin-top: 10px; }
-        .existing-review { display: flex; align-items: center; gap: 10px; }
-        .review-button, .edit-review-button {
-          padding: 6px 12px; border: none; border-radius: 4px;
-          cursor: pointer; font-size: 14px;
-        }
-        .review-button { background: #10b981; color: white; }
-        .edit-review-button { background: #3b82f6; color: white; }
-        .rating-stars { display: flex; gap: 2px; }
-        .star { cursor: pointer; font-size: 16px; }
-        .star.filled { color: #fbbf24; }
-        .star.clickable:hover { transform: scale(1.1); }
-        .modal-review-section {
-          margin-top: 20px; padding: 15px;
-          background: #f9fafb; border-radius: 8px;
-        }
-        .products-list { margin: 10px 0; }
-        .product-item {
-          display: flex; justify-content: space-between;
-          padding: 5px 0; border-bottom: 1px solid #e5e7eb;
-        }
-        .rating-section { margin: 15px 0; }
-        .rating-text { margin-left: 10px; color: #6b7280; }
-        .review-text-section { margin: 15px 0; }
-        .review-textarea {
-          width: 100%; padding: 10px;
-          border: 1px solid #d1d5db; border-radius: 4px; resize: vertical;
-        }
-        .review-actions { display: flex; gap: 10px; justify-content: flex-end; }
-        .cancel-review-button {
-          padding: 8px 16px; border: 1px solid #d1d5db;
-          background: white; border-radius: 4px; cursor: pointer;
-        }
-        .submit-review-button {
-          padding: 8px 16px; background: #10b981; color: white;
-          border: none; border-radius: 4px; cursor: pointer;
-        }
-      `}</style>
     </div>
   );
 };

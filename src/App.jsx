@@ -1,8 +1,7 @@
-// App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import { CartProvider } from './context/CartContext'; // Import CartProvider
+import { CartProvider } from './context/CartContext';
 import Navbar from './components/common/Navbar';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
@@ -15,8 +14,9 @@ import AdminPanel from './pages/admin/AdminPanel';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import ProductDetail from './pages/ProductDetail';
 import Checkout from './pages/Checkout'; 
-import './App.css';
 import Orders from './pages/Orders';
+import OrderDetail from './pages/OrderDetail';
+import './App.css';
 
 function App() {
   return (
@@ -67,6 +67,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Orders />
+                    </ProtectedRoute>
+                  } 
+                />
+                   <Route 
+                  path="/order-detail"
+                  element={
+                    <ProtectedRoute>
+                      <OrderDetail />
                     </ProtectedRoute>
                   } 
                 />

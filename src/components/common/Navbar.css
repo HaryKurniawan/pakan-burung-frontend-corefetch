@@ -1,22 +1,21 @@
+/* === Desktop Navbar === */
 .nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #ffffff; /* slate-800 */
+  background-color: #ffffff;
   height: 80px;
-  padding: 0px;  
-  color: white;
+  padding: 0 20px;
   color: rgb(0, 0, 0);
-  padding: 0px 20px;
 }
 
 .nav h3 {
-font-weight: 500;
+  font-weight: 500;
 }
 
 .nav .button {
   margin-left: 1rem;
-  background-color: #3b82f6; /* blue-500 */
+  background-color: #3b82f6;
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 6px;
@@ -27,11 +26,90 @@ font-weight: 500;
 }
 
 .nav .button:hover {
-  background-color: #2563eb; /* blue-600 */
+  background-color: #2563eb;
 }
 
-.welcome-text {
-  margin-right: 1rem;
-  font-size: 0.95rem;
-  color: #cbd5e1; /* slate-300 */
+/* === Mobile Top Navbar === */
+.mobile-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  display: none;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  z-index: 100;
+}
+
+.mobile-user {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.mobile-cart {
+  font-size: 1rem;
+  text-decoration: none;
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+/* Tombol back khusus mobile product detail */
+.back-button {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #3b82f6;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* === Mobile Bottom Navigation === */
+.mobile-bottom {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #ffffff;
+  border-top: 1px solid #e5e7eb;
+  justify-content: space-around;
+  padding: 0.75rem 0;
+  z-index: 100;
+}
+
+.nav-item {
+  text-decoration: none;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.nav-item.active {
+  color: #3b82f6;
+  border-bottom: 2px solid #3b82f6;
+}
+
+/* === Responsive Rules === */
+@media screen and (max-width: 768px) {
+  .desktop-nav {
+    display: none;
+  }
+
+  .mobile-top {
+    display: flex;
+    height: 40px;
+  }
+
+  .mobile-bottom {
+    display: flex;
+    height: 30px;
+
+  }
+
+  /* Bottom nav disembunyikan saat di halaman produk detail */
+  .hide-mobile-bottom {
+    display: none !important;
+  }
 }
