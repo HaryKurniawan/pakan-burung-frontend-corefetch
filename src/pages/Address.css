@@ -1,8 +1,9 @@
 /* Address Component Styles */
 
-.address-container {
-  /* Main container for the address component */
-  color: #000;
+.contain-address{
+  height: 100vh;
+  width: 100%;
+  padding-top: 70px;
 }
 
 .address-header {
@@ -12,9 +13,6 @@
   margin-bottom: 20px;
 }
 
-.back-button {
-  background-color: #6c757d;
-}
 
 .add-address-button {
   margin-bottom: 20px;

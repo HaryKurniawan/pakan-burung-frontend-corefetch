@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { addressAPI } from '../services/api';
 import './Address.css'; // Import CSS file
+import Header from '../components/common/Header'
 
 const Address = () => {
   const { currentUser } = useAuth();
@@ -211,14 +212,8 @@ const Address = () => {
   };
 
   return (
-    <div className="form address-container">
-      <div className="address-header">
-        <h2>Kelola Alamat</h2>
-        <Link to="/profile" className="button back-button">
-          Kembali ke Profile
-        </Link>
-      </div>
-
+    <div className="contain-address">
+       <Header title="Alamat" />
       <button 
         className="button add-address-button" 
         onClick={() => {

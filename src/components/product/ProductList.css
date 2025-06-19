@@ -1,8 +1,8 @@
 .contain-card {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
-  padding-top: 50px;
+  gap: 10px;
+  padding-top: 80px;
 }
 
 @media screen and (max-width: 768px) {

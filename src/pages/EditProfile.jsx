@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authAPI } from '../services/api';
+import Header from '../components/common/Header'
+
 
 const EditProfile = () => {
   const { currentUser, updateUser } = useAuth();
@@ -56,7 +58,8 @@ const EditProfile = () => {
 
   return (
     <div className="form">
-      <h2>Edit Profile</h2>
+       <Header title="Edit Profil" />
+
       <form onSubmit={handleSubmit}>
         <input
           className="input"

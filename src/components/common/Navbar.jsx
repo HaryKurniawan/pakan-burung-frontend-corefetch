@@ -4,6 +4,13 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCartContext } from '../../context/CartContext';
 import './Navbar.css';
+import CartIcon from '../../assets/cartIcon.svg';
+import HomeIcon from '../../assets/home.svg';
+import OrderIcon from '../../assets/order.svg';
+import UserIcon from '../../assets/user.svg';
+
+
+
 
 const Navbar = () => {
   const { currentUser } = useAuth();
@@ -14,7 +21,7 @@ const Navbar = () => {
   const isActive = (path) => location.pathname === path;
 
   // Halaman tanpa Navbar sama sekali
-  const hideNavbar = ['/login', '/register'].includes(location.pathname);
+  const hideNavbar = ['/login', '/register', '/address', '/edit-profile', '/order-detail', '/cart'].includes(location.pathname);
 
   // Halaman yang menampilkan mobile bottom nav
   const showMobileBottom = ['/', '/orders', '/profile'].includes(location.pathname);
@@ -54,20 +61,30 @@ const Navbar = () => {
       <div className="mobile-top">
         <div className="mobile-left">
           {showBackButtonMobileTop ? (
-            <button className="back-button" onClick={() => navigate(-1)}>← Back</button>
+            <button className="back-button" onClick={() => navigate(-1)}>←</button>
           ) : (
-            <span className="mobile-user">Haii, {currentUser ? currentUser.nama : 'User'}</span>
+            <span className="mobile-user">Haii, {currentUser ? currentUser.username : 'User'}</span>
           )}
         </div>
-        <Link to="/cart" className="mobile-cart">🛒 ({cartCount})</Link>
+
+
+        <Link to="/cart" className="mobile-cart">        
+        <img src={CartIcon} />
+        <p></p>
+     {cartCount > 0 && (
+    <div className="cart-count-icon">
+      {cartCount}
+    </div>
+  )}
+        </Link>
       </div>
 
       {/* Mobile Bottom Navigation */}
       {showMobileBottom && (
         <div className="mobile-bottom">
-          <Link to="/" className={`nav-item ${isActive('/') ? 'active' : ''}`}>Home</Link>
-          <Link to="/orders" className={`nav-item ${isActive('/orders') ? 'active' : ''}`}>Orders</Link>
-          <Link to="/profile" className={`nav-item ${isActive('/profile') ? 'active' : ''}`}>Profile</Link>
+          <Link to="/" className={`nav-item ${isActive('/') ? 'active' : ''}`}><img src={HomeIcon} /><p>Home</p></Link>
+          <Link to="/orders" className={`nav-item ${isActive('/orders') ? 'active' : ''}`}><img src={OrderIcon} /><p>Orders</p></Link>
+          <Link to="/profile" className={`nav-item ${isActive('/profile') ? 'active' : ''}`}><img src={UserIcon} /><p>Profile</p></Link>
         </div>
       )}
     </>

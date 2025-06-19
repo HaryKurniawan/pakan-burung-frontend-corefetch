@@ -9,3 +9,8 @@
   margin-bottom: 20px;
 }
 
+@media (max-width: 480px) {
+  .orders-container{
+    padding-top: 80px;
+  }
+}

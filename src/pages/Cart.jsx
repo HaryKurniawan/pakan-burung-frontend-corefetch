@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import CartItem from '../components/cart/CartItem';
 import CartSummary from '../components/cart/CartSummary';
 import VoucherSection from '../components/cart/VoucherSection';
+import Header from '../components/common/Header'
 import './Cart.css';
 
 const Cart = () => {
@@ -80,7 +81,7 @@ const Cart = () => {
 
   return (
     <div className="cart-container">
-      <h2>Keranjang Belanja</h2>
+       <Header title="keranjang" />
 
       {cart.length === 0 ? (
         <p>Keranjang Anda kosong.</p>

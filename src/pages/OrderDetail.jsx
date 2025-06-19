@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ordersAPI, reviewsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import Header from '../components/common/Header'
+
 
 const OrderDetail = () => {
   const location = useLocation();
@@ -166,10 +168,11 @@ const OrderDetail = () => {
 
   return (
     <div>
+       <Header title="Detail Pesanan" />
       
 
       <div>
-        <h2>Detail Pesanan {order.order_number}</h2>
+        <h2>No{order.order_number}</h2>
         
         <div>
           <p>Tanggal Pesanan: {new Date(order.created_at).toLocaleDateString('id-ID', {

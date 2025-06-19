@@ -15,8 +15,7 @@
 
 .back-button {
   padding: 8px 16px;
-  background-color: #6c757d;
-  color: white;
+  color: rgb(39, 39, 39);
   border: none;
   border-radius: 6px;
   cursor: pointer;

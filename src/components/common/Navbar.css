@@ -3,7 +3,6 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #ffffff;
   height: 80px;
   padding: 0 20px;
   color: rgb(0, 0, 0);
@@ -35,8 +34,6 @@
   top: 0;
   left: 0;
   right: 0;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
   display: none;
   justify-content: space-between;
   align-items: center;
@@ -50,10 +47,11 @@
 }
 
 .mobile-cart {
-  font-size: 1rem;
+  font-size: 10px;
   text-decoration: none;
   color: #3b82f6;
   font-weight: 600;
+  display: flex;
 }
 
 /* Tombol back khusus mobile product detail */
@@ -84,13 +82,37 @@
   text-decoration: none;
   color: #6b7280;
   font-weight: 500;
+  line-height: 1px;
+  font-size: 12px;
 }
 
 .nav-item.active {
-  color: #3b82f6;
-  border-bottom: 2px solid #3b82f6;
+  color: #242424;
 }
 
+.nav-item img{
+  height: 20px;
+  width: 20px;
+}
+
+.nav-item.active img {
+  filter: grayscale(100%) brightness(0.2);
+}
+
+
+
+.cart-count-icon{
+  height: 16px;
+  width: 16px;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 100px;
+  background-color: #f81d1d;
+  margin-top: -6px;
+  margin-left: -10px;
+}
 /* === Responsive Rules === */
 @media screen and (max-width: 768px) {
   .desktop-nav {
@@ -100,11 +122,16 @@
   .mobile-top {
     display: flex;
     height: 40px;
+    background-color: #F6F6F6;
   }
 
   .mobile-bottom {
     display: flex;
-    height: 30px;
+    height: 46px;
+    font-size: 14px;
+    justify-content: center;
+    align-items: center;
+    gap: 18%;
 
   }
 

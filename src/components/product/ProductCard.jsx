@@ -13,6 +13,8 @@ const ProductCard = ({ product }) => {
 
   return (
     <div className="product-card" onClick={handleClick}>
+
+      <div className="product-image-contain">
       {firstPhoto && (
         <img
           src={firstPhoto}
@@ -20,11 +22,15 @@ const ProductCard = ({ product }) => {
           className="product-image"
         />
       )}
+      </div>
 
-      <h3 className="product-name">{product.nama_produk}</h3>
-      <p className="product-price">
+
+      <div className="produkcard-section2">
+      <h3 className="product-namee">{product.nama_produk}</h3>
+      <p className="product-pricee">
         Rp {Number(product.harga).toLocaleString()}
       </p>
+      </div>
     </div>
   );
 };
