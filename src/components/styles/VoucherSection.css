@@ -1,8 +1,4 @@
 .voucher-section {
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  padding: 20px;
   margin: 20px 0;
 }
 
@@ -17,6 +13,9 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  background-color: #efefef;
+  border-radius: 100px;
+  overflow: hidden;
 }
 
 .voucher-input-group {
@@ -27,16 +26,17 @@
 .voucher-input {
   flex: 1;
   padding: 12px 16px;
-  border: 1px solid #ddd;
+  border:none;
   border-radius: 6px;
   font-size: 14px;
   transition: border-color 0.2s;
+  background-color: transparent;
 }
 
 .voucher-input:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  border-radius: 100px;
+  border-color: transparent;
 }
 
 .voucher-input:disabled {
@@ -46,8 +46,7 @@
 
 .apply-voucher-btn {
   padding: 12px 20px;
-  background-color: #007bff;
-  color: white;
+  color: rgb(58, 58, 58);
   border: none;
   border-radius: 6px;
   font-size: 14px;
@@ -55,16 +54,13 @@
   cursor: pointer;
   transition: all 0.2s;
   white-space: nowrap;
+  background-color: transparent;
 }
 
-.apply-voucher-btn:hover:not(:disabled) {
-  background-color: #0056b3;
+.apply-voucher-btn:hover{
+  background-color: #cdcdcd;
 }
 
-.apply-voucher-btn:disabled {
-  background-color: #6c757d;
-  cursor: not-allowed;
-}
 
 .voucher-message {
   padding: 8px 12px;
@@ -151,9 +147,7 @@
 }
 
 @media (max-width: 768px) {
-  .voucher-input-group {
-    flex-direction: column;
-  }
+
   
   .voucher-info {
     flex-direction: column;

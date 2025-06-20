@@ -1,34 +1,38 @@
 import React from 'react';
+import './CartItem.css';
 
 const CartItem = ({ item, onRemove, onUpdateQuantity }) => {
-  const handleRemove = () => {
-    onRemove(item.id);
-  };
-
-  // ✅ FUNGSI BARU: Handle increment quantity
   const handleIncrement = () => {
     onUpdateQuantity(item.id, item.jumlah + 1);
   };
 
-  // ✅ FUNGSI BARU: Handle decrement quantity
   const handleDecrement = () => {
     if (item.jumlah > 1) {
       onUpdateQuantity(item.id, item.jumlah - 1);
+    } else if (item.jumlah === 1) {
+      const confirmRemove = window.confirm(
+        `Apakah Anda yakin ingin menghapus "${item.products.nama_produk}" dari keranjang?`
+      );
+      
+      if (confirmRemove) {
+        onRemove(item.id);
+      }
     }
   };
 
   return (
     <div className="cart-item">
-      <div>
-        <h4>{item.products.nama_produk}</h4>
+        <div className="left-cart-item">
+          <h5>{item.products.nama_produk}</h5>
+          <p>Rp {Number(item.products.harga).toLocaleString()}</p>
+        </div>
+
         
-        {/* ✅ QUANTITY CONTROLS BARU */}
         <div className="quantity-controls">
-          <span>Quantity: </span>
           <button 
             className="quantity-btn"
             onClick={handleDecrement}
-            disabled={item.jumlah <= 1}
+            title={item.jumlah === 1 ? "Klik untuk menghapus dari keranjang" : "Kurangi quantity"}
           >
             -
           </button>
@@ -41,15 +45,7 @@ const CartItem = ({ item, onRemove, onUpdateQuantity }) => {
           </button>
         </div>
         
-        <p>Price: Rp {Number(item.products.harga).toLocaleString()}</p>
-        <p>Subtotal: Rp {(Number(item.products.harga) * item.jumlah).toLocaleString()}</p>
-      </div>
-      <button 
-        className="button danger"
-        onClick={handleRemove}
-      >
-        Remove
-      </button>
+      
     </div>
   );
 };

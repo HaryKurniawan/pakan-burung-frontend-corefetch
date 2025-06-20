@@ -6,7 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import CartItem from '../components/cart/CartItem';
 import CartSummary from '../components/cart/CartSummary';
 import VoucherSection from '../components/cart/VoucherSection';
-import Header from '../components/common/Header'
+import Header from '../components/common/Header';
+import NotificationToast from '../components/common/NotificationToast';
 import './Cart.css';
 
 const Cart = () => {
@@ -19,35 +20,55 @@ const Cart = () => {
   const [appliedVoucher, setAppliedVoucher] = useState(null);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [voucherCode, setVoucherCode] = useState('');
-  const [voucherError, setVoucherError] = useState('');
-  const [voucherSuccess, setVoucherSuccess] = useState('');
+  
+  // Notification state
+  const [notification, setNotification] = useState({
+    show: false,
+    type: '', // 'success' or 'error'
+    message: ''
+  });
 
   // Calculate final amounts
   const finalAmount = totalAmount - discountAmount;
 
+  // Show notification function
+  const showNotification = (type, message) => {
+    setNotification({
+      show: true,
+      type,
+      message
+    });
+    
+    // Auto hide after 3 seconds
+    setTimeout(() => {
+      setNotification({
+        show: false,
+        type: '',
+        message: ''
+      });
+    }, 3000);
+  };
+
   const handleApplyVoucher = async () => {
     if (!voucherCode.trim()) {
-      setVoucherError('Masukkan kode voucher');
+      showNotification('error', 'Masukkan kode voucher');
       return;
     }
 
     if (!currentUser) {
-      setVoucherError('Silakan login terlebih dahulu');
+      showNotification('error', 'Silakan login terlebih dahulu');
       return;
     }
 
     try {
-      setVoucherError('');
-      setVoucherSuccess('');
-      
       const result = await validateVoucher(voucherCode, totalAmount, currentUser.id);
       
       setAppliedVoucher(result.voucher);
       setDiscountAmount(result.discountAmount);
-      setVoucherSuccess(`Voucher berhasil diterapkan! Diskon: Rp ${result.discountAmount.toLocaleString()}`);
+      showNotification('success', `Voucher berhasil diterapkan! Diskon: Rp ${result.discountAmount.toLocaleString()}`);
       
     } catch (error) {
-      setVoucherError(error.message);
+      showNotification('error', error.message);
       setAppliedVoucher(null);
       setDiscountAmount(0);
     }
@@ -57,13 +78,12 @@ const Cart = () => {
     setAppliedVoucher(null);
     setDiscountAmount(0);
     setVoucherCode('');
-    setVoucherError('');
-    setVoucherSuccess('');
+    showNotification('success', 'Voucher berhasil dihapus');
   };
 
   const handleNavigateToCheckout = () => {
     if (cart.length === 0) {
-      alert('Keranjang kosong!');
+      showNotification('error', 'Keranjang kosong!');
       return;
     }
 
@@ -81,7 +101,14 @@ const Cart = () => {
 
   return (
     <div className="cart-container">
-       <Header title="keranjang" />
+      <Header title="keranjang" />
+
+      {/* Notification Toast */}
+      <NotificationToast 
+        show={notification.show}
+        type={notification.type}
+        message={notification.message}
+      />
 
       {cart.length === 0 ? (
         <p>Keranjang Anda kosong.</p>
@@ -105,8 +132,6 @@ const Cart = () => {
             onApplyVoucher={handleApplyVoucher}
             onRemoveVoucher={handleRemoveVoucher}
             appliedVoucher={appliedVoucher}
-            voucherError={voucherError}
-            voucherSuccess={voucherSuccess}
             loading={voucherLoading}
           />
 

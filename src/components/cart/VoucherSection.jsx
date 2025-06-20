@@ -7,14 +7,10 @@ const VoucherSection = ({
   onApplyVoucher,
   onRemoveVoucher,
   appliedVoucher,
-  voucherError,
-  voucherSuccess,
   loading
 }) => {
   return (
     <div className="voucher-section">
-      <h3>Kode Voucher</h3>
-      
       {!appliedVoucher ? (
         <div className="voucher-input-section">
           <div className="voucher-input-group">
@@ -34,18 +30,6 @@ const VoucherSection = ({
               {loading ? 'Validating...' : 'Terapkan'}
             </button>
           </div>
-          
-          {voucherError && (
-            <div className="voucher-message error">
-              {voucherError}
-            </div>
-          )}
-          
-          {voucherSuccess && (
-            <div className="voucher-message success">
-              {voucherSuccess}
-            </div>
-          )}
         </div>
       ) : (
         <div className="applied-voucher">
@@ -74,10 +58,6 @@ const VoucherSection = ({
             >
               ✕
             </button>
-          </div>
-          
-          <div className="voucher-message success">
-            ✅ Voucher berhasil diterapkan!
           </div>
         </div>
       )}

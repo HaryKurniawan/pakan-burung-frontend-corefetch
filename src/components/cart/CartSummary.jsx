@@ -17,6 +17,15 @@ const CartSummary = ({
           <span>Subtotal</span>
           <span>Rp {totalAmount.toLocaleString()}</span>
         </div>
+        <div className="summary-row">
+          <span>Ongkir</span>
+          <span>Rp 0</span>
+        </div>
+
+        <div className="summary-row">
+          <span>Vocher</span>
+          <span>Rp -0</span>
+        </div>
         
         {appliedVoucher && discountAmount > 0 && (
           <div className="summary-row discount-row">
@@ -26,12 +35,17 @@ const CartSummary = ({
             </span>
           </div>
         )}
+
+        <hr />
         
-        <div className="summary-row total-row">
-          <span className="total-label">Total</span>
-          <span className="total-amount">
-            Rp {(finalAmount || totalAmount).toLocaleString()}
-          </span>
+        <div className="bottom-cart-summary">
+          <div className="bottom-sumary-teks">
+            <span className="total-label">Total</span> <br />
+            <span className="total-amount">Rp {(finalAmount || totalAmount).toLocaleString()}</span>
+          </div>
+          <button className="checkout_button" onClick={onCheckout} disabled={disabled}>
+            Checkout
+          </button>
         </div>
         
         {appliedVoucher && discountAmount > 0 && (
@@ -41,15 +55,10 @@ const CartSummary = ({
             </small>
           </div>
         )}
+
       </div>
       
-      <button 
-        className="checkout-button"
-        onClick={onCheckout}
-        disabled={disabled}
-      >
-        Lanjut ke Pembayaran
-      </button>
+      
     </div>
   );
 };
