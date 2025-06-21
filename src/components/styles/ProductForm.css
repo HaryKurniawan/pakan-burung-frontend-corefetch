@@ -40,7 +40,6 @@
 .input:focus {
   outline: none;
   border-color: #3498db;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
   transform: translateY(-1px);
   color: #2c3e50;
 }
@@ -67,7 +66,6 @@
   outline: none;
   border-color: #3498db;
   background-color: #ffffff;
-  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 .textarea:hover {
@@ -103,9 +101,6 @@
   transition: all 0.3s ease;
 }
 
-.photo-upload-item:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
 
 .photo-upload-item label {
   min-width: 140px;
@@ -135,9 +130,6 @@
   transition: all 0.3s ease;
 }
 
-.photo-upload-item .input[type="file"]::-webkit-file-upload-button:hover {
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
 
 /* Remove File Button */
 .remove-file-btn {
@@ -153,9 +145,6 @@
   min-width: 70px;
 }
 
-.remove-file-btn:hover {
-  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
-}
 
 /* Photo Preview */
 .photo-preview {
@@ -189,9 +178,7 @@
   transition: all 0.3s ease;
 }
 
-.preview-item:hover {
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
+
 
 .preview-item img {
   width: 100%;

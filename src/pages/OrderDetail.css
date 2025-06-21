@@ -40,7 +40,6 @@
 .order-detail-content {
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   overflow: hidden;
 }
 
@@ -231,7 +230,6 @@
   width: 90%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
 .modal-header {

@@ -1,9 +1,13 @@
 // pages/ProductDetail.js
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Modal } from 'antd';
 import api, { reviewsAPI } from '../services/api';
 import { useCart } from '../hooks/useCart';
+import ProductImageViewer from '../components/ProductImageViewer';
 import './ProductDetail.css';
+import ToCartIcon from '../assets/to-cart.svg';
+
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -14,6 +18,11 @@ const ProductDetail = () => {
   const [reviews, setReviews] = useState([]);
   const [averageRating, setAverageRating] = useState({ average: 0, count: 0 });
   const [loading, setLoading] = useState(true);
+  
+  // Modal states
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalType, setModalType] = useState(''); // 'cart' or 'buy'
+  const [modalQuantity, setModalQuantity] = useState(1);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -36,11 +45,9 @@ const ProductDetail = () => {
   const fetchProductReviews = async () => {
     try {
       setLoading(true);
-      // Use the new API method to get product reviews from orders
       const reviewsData = await reviewsAPI.getProductReviewsFromOrders(parseInt(id));
       setReviews(reviewsData);
       
-      // Calculate average rating
       if (reviewsData.length > 0) {
         const totalRating = reviewsData.reduce((sum, review) => sum + review.rating, 0);
         const average = totalRating / reviewsData.length;
@@ -76,171 +83,201 @@ const ProductDetail = () => {
     return stars;
   };
 
-  // Function to get all available photos from product_photos
-  const getProductPhotos = () => {
+  // Fungsi untuk mendapatkan array URL foto produk
+  const getProductImageUrls = () => {
     if (!product?.product_photos?.[0]) return [];
     
     const photos = [];
     const photoData = product.product_photos[0];
     
-    // Add photos in order if they exist
     if (photoData.url_foto) {
-      photos.push({ url: photoData.url_foto, label: 'Foto 1' });
+      photos.push(photoData.url_foto);
     }
     if (photoData.url_foto_1) {
-      photos.push({ url: photoData.url_foto_1, label: 'Foto 2' });
+      photos.push(photoData.url_foto_1);
     }
     if (photoData.url_foto_2) {
-      photos.push({ url: photoData.url_foto_2, label: 'Foto 3' });
+      photos.push(photoData.url_foto_2);
     }
     
     return photos;
   };
 
-  if (!product) return <p>Loading...</p>;
+  // Modal handlers
+  const showModal = (type) => {
+    setModalType(type);
+    setModalQuantity(1);
+    setModalVisible(true);
+  };
 
-  const increase = () => {
-    if (jumlah < product.stok) {
-      setJumlah(prev => prev + 1);
+  const handleModalCancel = () => {
+    setModalVisible(false);
+    setModalQuantity(1);
+  };
+
+  const handleModalConfirm = () => {
+    if (modalType === 'cart') {
+      addToCart({ ...product, jumlah: modalQuantity });
+    } else if (modalType === 'buy') {
+      const item = {
+        product_id: product.id,
+        jumlah: modalQuantity,
+        products: product,
+      };
+      navigate('/checkout', { 
+        state: { 
+          cartItems: [item], 
+          totalAmount: product.harga * modalQuantity 
+        } 
+      });
+    }
+    setModalVisible(false);
+    setModalQuantity(1);
+  };
+
+  const handleQuantityChange = (value) => {
+    if (value >= 1 && value <= product.stok) {
+      setModalQuantity(value);
     }
   };
 
-  const decrease = () => {
-    if (jumlah > 1) {
-      setJumlah(prev => prev - 1);
-    }
-  };
+  if (!product) return (
+    <div className="loading-container">
+      <div className="spinner"></div>
+    </div>
+  );
 
-  const handleAddToCart = () => {
-    addToCart({ ...product, jumlah });
-  };
-
-  const handleBuyNow = () => {
-    const item = {
-      product_id: product.id,
-      jumlah,
-      products: product,
-    };
-    navigate('/checkout', { state: { cartItems: [item], totalAmount: product.harga * jumlah } });
-  };
-
-  // Get available photos
-  const productPhotos = getProductPhotos();
+  const productImages = getProductImageUrls();
 
   return (
     <div className="product-detail-container">
-      {/* Product Info Section */}
+
       <div className="product-info-section">
-        
 
-        {/* Updated Photo Display */}
-        {productPhotos.length > 0 && (
-          <div className="photos-container">
-            {productPhotos.map((photo, index) => (
-              <img
-                key={index}
-                src={photo.url}
-                alt={photo.label}
-                className="product-photo"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                }}
-              />
-            ))}
-          </div>
-        )}
-
-        <h2 className="product-title">{product.nama_produk}</h2>
-        <p className="product-price">Rp {Number(product.harga).toLocaleString()}</p>
-        <div className="rating-container">
-          <div className="rating-display">
-            {renderStars(Math.round(averageRating.average), 20)}
-            <span className="rating-text">
-              {averageRating.average.toFixed(1)} ({averageRating.count} ulasan)
-            </span>
-          </div>
-        </div>
-        <p className="product-stock"><strong>Stok:</strong> {product.stok}</p>
-        <p className="product-detail"><strong>Detail:</strong> {product.detail_produk}</p>
-
-        {/* Show message if no photos available */}
-        {productPhotos.length === 0 && (
+        {productImages.length > 0 ? (
+          <ProductImageViewer images={productImages} />
+        ) : (
           <div className="no-photos-message">
-            Tidak ada foto produk tersedia
+            <span className="text-secondary">Tidak ada foto produk tersedia</span>
           </div>
         )}
 
-        {/* Input Jumlah */}
-        <div className="quantity-controls">
-          <button 
-            className="quantity-button" 
-            onClick={decrease} 
-            disabled={jumlah === 1}
-          >
-            -
-          </button>
-          <span className="quantity-display">{jumlah}</span>
-          <button 
-            className="quantity-button" 
-            onClick={increase} 
-            disabled={jumlah === product.stok}
-          >
-            +
-          </button>
+
+        <div className="contain-top-detail">
+          <h3 className="product-title-detail">{product.nama_produk}</h3>
+          <p>Stok:{product.stok}</p>
         </div>
 
-        {/* Action Buttons */}
-        <div className="action-buttons">
-          <button
-            className="button"
-            onClick={handleAddToCart}
-            disabled={product.stok === 0}
-          >
-            Add to Cart
-          </button>
-          <button
-            className="button"
-            onClick={handleBuyNow}
-            disabled={product.stok === 0}
-          >
-            Beli Sekarang
-          </button>
+        <div className="contain-top-detail">
+          <h2 className="product-price-detail">Rp {Number(product.harga).toLocaleString()}</h2>
+          <div className="rating-display">
+            <div className="stars">{renderStars(Math.round(averageRating.average))} {averageRating.average.toFixed(1)}
+            </div>
+          </div>
         </div>
+        <div className="contain-detail-produk">
+        <p> {product.detail_produk}</p>
+
+        </div>
+
+        <div className="action-buttonss">
+          <button className="btn-to-buy" onClick={() => showModal('buy')} disabled={product.stok === 0}>Beli Sekarang</button>
+          <button className="btn-to-cart" onClick={() => showModal('cart')} disabled={product.stok === 0}><img src={ToCartIcon} /></button>
+        </div>
+
       </div>
 
-      {/* Reviews Section - Display Only */}
-      <div className="reviews-section">
-        <h3 className="reviews-title">Ulasan Produk</h3>
-        
-        {/* Loading state for reviews */}
-        {loading ? (
-          <p className="loading-reviews">Memuat ulasan...</p>
-        ) : (
-          <>
-            {/* Rating Summary */}
-            <div className="rating-summary">
-              <div className="rating-summary-content">
-                <div className="average-rating-number">
-                  {averageRating.average.toFixed(1)}
-                </div>
-                <div className="average-rating-stars">
-                  {renderStars(Math.round(averageRating.average), 20)}
-                </div>
-                <div className="rating-count">
-                  {averageRating.count} ulasan
-                </div>
+      <Modal
+        title={modalType === 'cart' ? 'Tambah ke Keranjang' : 'Beli Sekarang'}
+        open={modalVisible}
+        onCancel={handleModalCancel}
+        footer={[
+          <button key="cancel" className="btn btn-secondary" onClick={handleModalCancel}>
+            Batal
+          </button>,
+          <button 
+            key="confirm" 
+            className="btn btn-primary"
+            onClick={handleModalConfirm}
+            disabled={modalQuantity < 1 || modalQuantity > product.stok}
+          >
+            {modalType === 'cart' ? 'Tambah ke Keranjang' : 'Lanjut ke Checkout'}
+          </button>,
+        ]}
+        width={600}
+      >
+        <div className="modal-content">
+          {/* Product Image */}
+          <div className="modal-product-image">
+            {productImages.length > 0 ? (
+              <img
+                src={productImages[0]}
+                alt={product.nama_produk}
+                className="product-image"
+              />
+            ) : (
+              <div className="no-image">
+                <span className="text-secondary">No Image</span>
+              </div>
+            )}
+          </div>
+          
+          <div className="modal-product-info">
+
+            <p className="modal-product-title">{product.nama_produk}</p>
+            <h3 className="modal-product-price">Rp {Number(product.harga).toLocaleString()}</h3>
+
+            <hr className="modal-divider" />
+
+            <div className="modal-quantity-container">
+
+              <span className="modal-quantity-label">Jumlah:</span>
+              <div className="modal-quantity-controls">
+                <button className="btn btn-small" onClick={() => handleQuantityChange(modalQuantity - 1)} disabled={modalQuantity <= 1}>-</button>
+                <input
+                  type="number"
+                  min={1}
+                  max={product.stok}
+                  value={modalQuantity}
+                  onChange={(e) => handleQuantityChange(parseInt(e.target.value))}
+                  className="quantity-input"
+                />
+                <button
+                  className="btn btn-small"
+                  onClick={() => handleQuantityChange(modalQuantity + 1)}
+                  disabled={modalQuantity >= product.stok}
+                >
+                  +
+                </button>
               </div>
             </div>
+            <div className="modal-total-price">
+              <strong>Total: Rp {(product.harga * modalQuantity).toLocaleString()}</strong>
+            </div>
+          </div>
+        </div>
+      </Modal>
 
-            {/* Reviews List */}
+      <div className="reviews-section">
+        
+        {loading ? (
+          <div className="loading-reviews">
+            <div className="spinner"></div>
+            <span>Memuat ulasan...</span>
+          </div>
+        ) : (
+          <>
+
             <div>
-              <h4 className="reviews-list-title">Semua Ulasan ({reviews.length})</h4>
+              <h4 className="reviews-list-title">Ulasan ({reviews.length})</h4>
+
               {reviews.length === 0 ? (
-                <p className="no-reviews">Belum ada ulasan untuk produk ini.</p>
+                <div className="no-reviews-message">
+                  <span className="text-secondary">Belum ada ulasan untuk produk ini.</span>
+                </div>
               ) : (
                 <div className="reviews-list">
                   {reviews.map((review) => {
-                    // Find the specific product in the order items
                     const productInOrder = review.orders?.order_items?.find(item => 
                       item.product_id === parseInt(id)
                     );
@@ -249,27 +286,26 @@ const ProductDetail = () => {
                       <div key={review.id} className="review-item">
                         <div className="review-header">
                           <div className="review-user-info">
-                            <div className="review-username">
-                              {review.users?.nama || 'Anonymous'}
-                            </div>
+                            <strong>{review.users?.nama || 'Anonymous'}</strong>
                             <div className="review-rating">
                               {renderStars(review.rating)}
                               <span className="review-rating-text">
                                 ({review.rating}/5)
                               </span>
                             </div>
-                            {/* Show quantity purchased if available */}
                             {productInOrder && (
-                              <div className="review-quantity">
+                              <span className="text-secondary review-purchase-info">
                                 Membeli {productInOrder.quantity} item
-                              </div>
+                              </span>
                             )}
                           </div>
-                          <span className="review-date">
+                          <span className="text-secondary review-date">
                             {new Date(review.tanggal).toLocaleDateString('id-ID')}
                           </span>
                         </div>
-                        <p className="review-text">{review.ulasan}</p>
+                        <p className="review-content">
+                          {review.ulasan}
+                        </p>
                       </div>
                     );
                   })}
