@@ -22,11 +22,10 @@ const CartItem = ({ item, onRemove, onUpdateQuantity }) => {
 
   return (
     <div className="cart-item">
-        <div className="left-cart-item">
-          <h5>{item.products.nama_produk}</h5>
-          <p>Rp {Number(item.products.harga).toLocaleString()}</p>
+        <div className="cart-item-left">
+          <h5 className='cart-item-name'>{item.products.nama_produk}</h5>
+          <h5 className='cart-item-name'>Rp {Number(item.products.harga).toLocaleString()}</h5>
         </div>
-
         
         <div className="quantity-controls">
           <button 
@@ -36,7 +35,7 @@ const CartItem = ({ item, onRemove, onUpdateQuantity }) => {
           >
             -
           </button>
-          <span className="quantity-display">{item.jumlah}</span>
+          <span className="quantity-cart">{item.jumlah}</span>
           <button 
             className="quantity-btn"
             onClick={handleIncrement}

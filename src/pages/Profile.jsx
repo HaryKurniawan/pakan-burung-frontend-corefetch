@@ -1,32 +1,53 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import './Profile.css'; // Import CSS baru
+import './Profile.css';
+import GotoIcon from '../assets/GotoIcon.svg';
+import { Modal } from 'antd'; // ✅ import Modal
 
 const Profile = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout();
-    navigate('/');
+    Modal.confirm({
+      title: 'Konfirmasi Logout',
+      content: 'Apakah Anda yakin ingin logout?',
+      okText: 'Oke',
+      cancelText: 'Batal',
+      onOk() {
+        logout();
+        navigate('/');
+      },
+    });
   };
 
   return (
     <div className="form">
-      <h2>Profile</h2>
-
-      <div className="profile-info">
-        <p><strong>Name:</strong> {currentUser.nama}</p>
-        <p><strong>Username:</strong> {currentUser.username}</p>
-        <p><strong>Email:</strong> {currentUser.email}</p>
-        <p><strong>Phone:</strong> {currentUser.no_hp || 'Not provided'}</p>
+      <div className="contain-profileImage">
+        <div className="profileImage"></div>
       </div>
 
-      <div className="actions">
-        <Link to="/edit-profile" className="button">Edit Profile</Link>
-        <Link to="/address" className="button">Kelola Alamat</Link>
-        <button className="button danger" onClick={handleLogout}>Logout</button>
+      <div className="profile-info">
+        <h5>{currentUser.nama}</h5>
+        <p>{currentUser.email}</p>
+      </div>
+
+      <div className="contain-action-menu">
+        <div className="profile-actions" onClick={() => navigate('/edit-profile')}>
+          <p>Edit Profile</p>
+          <img src={GotoIcon} />
+        </div>
+
+        <div className="profile-actions" onClick={() => navigate('/address')}>
+          <p>Alamat</p>
+          <img src={GotoIcon} />
+        </div>
+
+        <div className="profile-actions" onClick={handleLogout}>
+          <p>Logout</p>
+          <img src={GotoIcon} />
+        </div>
       </div>
     </div>
   );

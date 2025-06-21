@@ -1,8 +1,32 @@
 .cart-item {
   display: flex;
   justify-content: space-between;
-  padding: 15px;
   border: 1px solid #ddd;
-  border-radius: 8px;
+  border-radius: 16px;
   background-color: white;
+  height: 100px;
+  padding: 0px 20px;
+  align-items: center;
+}
+
+.quantity-display{
+  border: none;
+}
+
+.cart-item-name{
+  line-height: 1px;
+  margin-top: 0px;
+  text-align: start;
+  font-weight: 500;
+  font-size: 14px;
+  margin-top: 20px;
+}
+
+.quantity-controls{
+  margin-bottom: 18px;
+}
+
+.quantity-cart{
+  width: 20px;
+  padding: 0px 4px;
 }

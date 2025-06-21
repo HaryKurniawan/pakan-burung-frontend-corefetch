@@ -4,7 +4,6 @@ import { useVouchers } from '../hooks/useVouchers';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import CartItem from '../components/cart/CartItem';
-import CartSummary from '../components/cart/CartSummary';
 import VoucherSection from '../components/cart/VoucherSection';
 import Header from '../components/common/Header';
 import NotificationToast from '../components/common/NotificationToast';
@@ -16,22 +15,18 @@ const Cart = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
 
-  // Voucher state
   const [appliedVoucher, setAppliedVoucher] = useState(null);
   const [discountAmount, setDiscountAmount] = useState(0);
   const [voucherCode, setVoucherCode] = useState('');
   
-  // Notification state
   const [notification, setNotification] = useState({
     show: false,
-    type: '', // 'success' or 'error'
+    type: '', 
     message: ''
   });
 
-  // Calculate final amounts
   const finalAmount = totalAmount - discountAmount;
 
-  // Show notification function
   const showNotification = (type, message) => {
     setNotification({
       show: true,
@@ -39,7 +34,6 @@ const Cart = () => {
       message
     });
     
-    // Auto hide after 3 seconds
     setTimeout(() => {
       setNotification({
         show: false,
@@ -87,7 +81,6 @@ const Cart = () => {
       return;
     }
 
-    // Pass voucher data to checkout
     const checkoutData = {
       cartItems: cart,
       totalAmount,
@@ -103,7 +96,6 @@ const Cart = () => {
     <div className="cart-container">
       <Header title="keranjang" />
 
-      {/* Notification Toast */}
       <NotificationToast 
         show={notification.show}
         type={notification.type}
@@ -125,24 +117,62 @@ const Cart = () => {
             ))}
           </div>
 
-          {/* Voucher Section */}
-          <VoucherSection
-            voucherCode={voucherCode}
-            setVoucherCode={setVoucherCode}
-            onApplyVoucher={handleApplyVoucher}
-            onRemoveVoucher={handleRemoveVoucher}
-            appliedVoucher={appliedVoucher}
-            loading={voucherLoading}
-          />
+          <div className="cart-bottom">
 
-          <CartSummary 
-            totalAmount={totalAmount}
-            discountAmount={discountAmount}
-            finalAmount={finalAmount}
-            appliedVoucher={appliedVoucher}
-            onCheckout={handleNavigateToCheckout}
-            disabled={cart.length === 0}
-          />
+         
+
+            <div className="cart-summary">
+              
+              <div className="summary-details">
+                   <VoucherSection
+                      voucherCode={voucherCode}
+                      setVoucherCode={setVoucherCode}
+                      onApplyVoucher={handleApplyVoucher}
+                      onRemoveVoucher={handleRemoveVoucher}
+                      appliedVoucher={appliedVoucher}
+                      loading={voucherLoading}
+                    />
+
+                    <div className="summmary-row-contain">
+
+                    <div className="summary-row">
+                      <span>Subtotal</span>
+                      <span>Rp {totalAmount.toLocaleString()}</span>
+                    </div>
+
+                    <div className="summary-row">
+                      <span>Ongkir</span>
+                      <span>Rp 0</span>
+                    </div>
+
+                    <div className="summary-row discount-row">
+                      <span>Vocher</span>
+                      <span className={discountAmount > 0 ? "discount-amount" : ""}>
+                        -Rp {discountAmount > 0 ? discountAmount.toLocaleString() : '0'}
+                      </span>
+                    </div>
+
+                    </div>
+
+                <div class="dashed-line"></div>
+
+                <div className="bottom-cart-summary">
+                  <div className="bottom-sumary-teks">
+                    <span className="total-label">Total</span> <br />
+                    <span className="total-harga">Rp {(finalAmount || totalAmount).toLocaleString()}</span>
+                  </div>
+                  <button 
+                    className="checkout_button" 
+                    onClick={handleNavigateToCheckout} 
+                    disabled={cart.length === 0}
+                  >
+                    Checkout
+                  </button>
+                </div>
+                
+              </div>
+            </div>
+          </div>
         </>
       )}
     </div>
