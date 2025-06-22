@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Modal } from 'antd';
 import { useAuth } from '../../context/AuthContext';
 import { authAPI } from '../../services/api';
+import './Login.css';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -46,14 +47,6 @@ const Login = () => {
     });
   };
 
-  const handlePasswordFocus = () => {
-    // Remove this function as it's no longer needed
-  };
-
-  const handlePasswordBlur = () => {
-    // Remove this function as it's no longer needed
-  };
-
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -67,11 +60,11 @@ const Login = () => {
   };
 
   return (
-    <div className="form">
+    <div className="login-form-container">
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         <input
-          className="input"
+          className="login-input-field"
           type="text"
           name="username"
           placeholder="Username"
@@ -79,33 +72,21 @@ const Login = () => {
           onChange={handleChange}
           required
         />
-        <div style={{ position: 'relative' }}>
+        <div className="login-password-wrapper">
           <input
-            className="input"
+            className="login-input-field login-password-field"
             type={showPassword ? "text" : "password"}
             name="password"
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
             required
-            style={{ paddingRight: '40px' }}
           />
           <button
             type="button"
             onClick={togglePasswordVisibility}
-            style={{
-              position: 'absolute',
-              right: '10px',
-              top: '50%',
-              transform: 'translateY(-50%)',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-              padding: '4px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
+            className="login-password-visibility-toggle"
+            title={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? (
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -126,31 +107,18 @@ const Login = () => {
             e.preventDefault();
             showForgotPasswordModal();
           }}
-          style={{
-            fontSize: '14px',
-            color: '#007bff',
-            textDecoration: 'none',
-            display: 'block',
-            textAlign: 'left',
-            marginTop: '8px',
-            marginBottom: '16px'
-          }}
+          className="login-forgot-password-link"
         >
           Lupa password?
         </a>
 
-        <button className="button" type="submit" disabled={loading}>
+        <button className="login-submit-btn" type="submit" disabled={loading}>
           {loading ? 'Loading...' : 'Login'}
         </button>
       </form>
       
-      <div style={{ 
-        textAlign: 'center', 
-        marginTop: '16px',
-        fontSize: '14px',
-        color: '#666'
-      }}>
-        Belum punya akun? <Link to="/register" style={{ color: '#007bff', textDecoration: 'none', fontWeight: 'bold' }}>Daftar</Link>
+      <div className="login-register-prompt">
+        Belum punya akun? <Link to="/register" className="login-register-link">Daftar</Link>
       </div>
 
       <Modal
@@ -161,16 +129,15 @@ const Login = () => {
         centered
         width={400}
       >
-        <div style={{ textAlign: 'center', padding: '20px 0' }}>
-          {/* Ilustrasi SVG */}
-          <div style={{ marginBottom: '24px' }}>
+        <div className="login-modal-content">
+          <div className="login-modal-illustration-wrapper">
             <svg 
               width="120" 
               height="120" 
               viewBox="0 0 120 120" 
               fill="none" 
               xmlns="http://www.w3.org/2000/svg"
-              style={{ margin: '0 auto', display: 'block' }}
+              className="login-modal-svg-icon"
             >
               {/* Background circle */}
               <circle cx="60" cy="60" r="60" fill="#f0f8ff" />
@@ -196,31 +163,13 @@ const Login = () => {
             </svg>
           </div>
           
-          {/* Keterangan */}
-          <p style={{ 
-            fontSize: '16px', 
-            color: '#666', 
-            marginBottom: '24px',
-            lineHeight: '1.5'
-          }}>
+          <p className="login-modal-message">
             Saat ini fitur ini belum tersedia
           </p>
           
-          {/* Button */}
           <button 
             onClick={handleModalClose}
-            style={{
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              padding: '8px 24px',
-              borderRadius: '6px',
-              fontSize: '14px',
-              cursor: 'pointer',
-              fontWeight: '500'
-            }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#0056b3'}
-            onMouseOut={(e) => e.target.style.backgroundColor = '#007bff'}
+            className="login-modal-action-btn"
           >
             Baiklah
           </button>

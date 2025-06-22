@@ -8,6 +8,8 @@ import CartIcon from '../../assets/cartIcon.svg';
 import HomeIcon from '../../assets/home.svg';
 import OrderIcon from '../../assets/order.svg';
 import UserIcon from '../../assets/user.svg';
+import BackIcon from '../../assets/arrow-right.svg';
+
 
 
 
@@ -61,7 +63,10 @@ const Navbar = () => {
       <div className="mobile-top">
         <div className="mobile-left">
           {showBackButtonMobileTop ? (
-            <button className="back-button" onClick={() => navigate(-1)}>←</button>
+            
+            <div className="back-nav" onClick={() => navigate(-1)}>
+              <img src={BackIcon} />
+            </div>
           ) : (
             <span className="mobile-user">Haii, {currentUser ? currentUser.username : 'User'}</span>
           )}

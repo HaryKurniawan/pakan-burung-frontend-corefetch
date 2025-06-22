@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { authAPI } from '../../services/api';
-import './Register.css'; // tambahkan ini di bagian atas file Register.js
+import './Register.css';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -66,37 +66,98 @@ const Register = () => {
   };
 
   return (
-    <div className="form-register">
+    <div className="register-main-container">
       <h3>Register</h3>
 
-      <form className='input-register-contain' onSubmit={handleSubmit}>
-        <input className="input-register" type="text" name="nama" placeholder="Full Name" value={formData.nama} onChange={handleChange} required />
+      <form className='register-form-wrapper' onSubmit={handleSubmit}>
+        <input 
+          className="register-text-field" 
+          type="text" 
+          name="nama" 
+          placeholder="Full Name" 
+          value={formData.nama} 
+          onChange={handleChange} 
+          required 
+        />
         
-        <input className="input-register" type="text" name="username" placeholder="Username" value={formData.username} onChange={handleChange} required />
+        <input 
+          className="register-text-field" 
+          type="text" 
+          name="username" 
+          placeholder="Username" 
+          value={formData.username} 
+          onChange={handleChange} 
+          required 
+        />
         
-        <input className="input-register" type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
+        <input 
+          className="register-text-field" 
+          type="email" 
+          name="email" 
+          placeholder="Email" 
+          value={formData.email} 
+          onChange={handleChange} 
+          required 
+        />
         
-        <div className="password-input-container">
-          <input className="input-register-password" type={showPassword ? "text" : "password"} name="password" placeholder="Password" value={formData.password} onChange={handleChange} required />
-          <button type="button" className="password-toggle-btn" onClick={() => setShowPassword(!showPassword)}>
+        <div className="register-password-field-wrapper">
+          <input 
+            className="register-password-input" 
+            type={showPassword ? "text" : "password"} 
+            name="password" 
+            placeholder="Password" 
+            value={formData.password} 
+            onChange={handleChange} 
+            required 
+          />
+          <button 
+            type="button" 
+            className="register-password-visibility-btn" 
+            onClick={() => setShowPassword(!showPassword)}
+          >
             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
 
-        <div className="password-input-container">
-          <input className="input-register-password" type={showConfirmPassword ? "text" : "password"} name="confirmPassword" placeholder="Confirm Password" value={formData.confirmPassword} onChange={handleChange} required />
-          <button type="button" className="password-toggle-btn" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+        <div className="register-password-field-wrapper">
+          <input 
+            className="register-password-input" 
+            type={showConfirmPassword ? "text" : "password"} 
+            name="confirmPassword" 
+            placeholder="Confirm Password" 
+            value={formData.confirmPassword} 
+            onChange={handleChange} 
+            required 
+          />
+          <button 
+            type="button" 
+            className="register-password-visibility-btn" 
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          >
             {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
 
-        <input className="input-register" type="tel" name="noHp" placeholder="Phone Number" value={formData.noHp} onChange={handleChange} required />
+        <input 
+          className="register-text-field" 
+          type="tel" 
+          name="noHp" 
+          placeholder="Phone Number" 
+          value={formData.noHp} 
+          onChange={handleChange} 
+          required 
+        />
         
-        <button className="button-register" type="submit" disabled={loading}>
+        <button 
+          className="register-submit-button" 
+          type="submit" 
+          disabled={loading}
+        >
           {loading ? 'Loading...' : 'Register'}
         </button>
       </form>
-      <p className='goto-login'>
+      
+      <p className='register-login-redirect'>
         Already have account? <Link to="/login"><b>Login here</b></Link>
       </p>
     </div>

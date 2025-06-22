@@ -54,17 +54,11 @@
   display: flex;
 }
 
-/* Tombol back khusus mobile product detail */
-.back-button {
-  background: none;
-  border: none;
-  font-size: 1rem;
-  color: #3b82f6;
-  font-weight: 600;
+.back-nav {
   cursor: pointer;
+
 }
 
-/* === Mobile Bottom Navigation === */
 .mobile-bottom {
   display: none;
   position: fixed;
