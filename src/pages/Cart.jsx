@@ -154,7 +154,7 @@ const Cart = () => {
 
                     </div>
 
-                <div class="dashed-line"></div>
+                <div className="dashed-line"></div>
 
                 <div className="bottom-cart-summary">
                   <div className="bottom-sumary-teks">

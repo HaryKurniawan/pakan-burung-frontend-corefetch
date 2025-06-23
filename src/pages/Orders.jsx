@@ -171,27 +171,17 @@ const Orders = () => {
 
   const getStatusColor = (statusName) => {
     const colors = {
-      'pending': '#fbbf24',
-      'confirmed': '#3b82f6',
-      'processing': '#8b5cf6',
-      'shipped': '#06b6d4',
-      'delivered': '#10b981',
+      'pending': '#ECEDEC',
+      'confirmed': '#FFAC4D',
+      'processing': '#FFAC4D',
+      'shipped': '#C3EB6D',
+      'delivered': '#C3EB6D',
       'cancelled': '#ef4444'
     };
     return colors[statusName] || '#6b7280';
   };
 
-  const getStatusIcon = (statusName) => {
-    const icons = {
-      'pending': '⏰',
-      'confirmed': '✅',
-      'processing': '🔄',
-      'shipped': '🚚',
-      'delivered': '📦',
-      'cancelled': '❌'
-    };
-    return icons[statusName] || '📋';
-  };
+
 
   const canCancelOrder = (status) => {
     return ['pending', 'confirmed'].includes(status);
@@ -235,19 +225,19 @@ const Orders = () => {
           className={`tab-button ${activeTab === 'active' ? 'active' : ''}`}
           onClick={() => setActiveTab('active')}
         >
-          Pesanan Aktif
-          {getOrderCount('active') > 0 && (
+         Aktif
+          {/* {getOrderCount('active') > 0 && (
             <span className="tab-badge">{getOrderCount('active')}</span>
-          )}
+          )} */}
         </button>
         <button
           className={`tab-button ${activeTab === 'completed' ? 'active' : ''}`}
           onClick={() => setActiveTab('completed')}
         >
-          Pesanan Selesai
-          {getOrderCount('completed') > 0 && (
+          Selesai
+          {/* {getOrderCount('completed') > 0 && (
             <span className="tab-badge">{getOrderCount('completed')}</span>
-          )}
+          )} */}
         </button>
       </div>
 
@@ -283,7 +273,7 @@ const Orders = () => {
                     className="order-status"
                     style={{ backgroundColor: getStatusColor(order.order_status.nama) }}
                   >
-                    {getStatusIcon(order.order_status.nama)} {order.order_status.deskripsi}
+                    {order.order_status.deskripsi}
                   </div>
                 </div>
 
@@ -303,15 +293,15 @@ const Orders = () => {
 
                 <div className="order-footer">
                   <div className="order-total">
-                    <strong>Total: Rp {Number(order.total_amount).toLocaleString()}</strong>
+                   <p>Total:</p> <p>Rp {Number(order.total_amount).toLocaleString()}</p>
                   </div>
                   <div className="order-actions">
-                    <button 
+                    <div 
                       onClick={() => handleViewDetails(order)}
                       className="view-details-button"
                     >
                       Lihat Detail
-                    </button>
+                    </div>
                     {canCancelOrder(order.order_status.nama) && (
                       <button 
                         onClick={() => {
