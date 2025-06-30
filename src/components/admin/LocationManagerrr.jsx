@@ -182,8 +182,6 @@ const LocationManagerrr = () => {
 
   return (
     <div className="location-manager">
-      <h2>Kelola Data Wilayah</h2>
-      
       <div className="tab-navigation">
         <button 
           className={activeTab === 'provinsi' ? 'active' : ''}

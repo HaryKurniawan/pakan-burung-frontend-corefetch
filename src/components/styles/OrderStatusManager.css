@@ -3,7 +3,6 @@
   padding: 20px;
   border-radius: 12px;
   color: #c3c3c3;
-  background-color: rgb(160, 160, 160);
 }
 
 .admin-orders h3 {
@@ -18,11 +17,51 @@
 .filter-section {
   margin-bottom: 20px;
   text-align: center;
-  padding: 10px;
+  padding: 15px;
   border-radius: 8px;
   border: 1px solid #ddd;
-  
   color: #333;
+}
+
+.filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  border: 2px solid #007bff;
+  background-color: #f8f9fa;
+  color: #007bff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.filter-btn:hover {
+  background-color: #e7f3ff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.filter-btn.active {
+  background-color: #007bff;
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+.filter-btn.active:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
 }
 
 .filter-section label {
@@ -39,7 +78,6 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 15px;
-  
   color: #333;
 }
 
@@ -69,7 +107,6 @@
   padding: 6px 10px;
   border-radius: 6px;
   border: 1px solid #ccc;
-  background-color: #868686;
   cursor: pointer;
   color: #000;
   transition: border-color 0.2s ease;
@@ -79,10 +116,27 @@
 .status-select:focus {
   border-color: #007bff;
   outline: none;
-  
   color: #333;
 }
 
 .order-th th{
     color: #333;
 }
+
+.search-section {
+  display: flex;
+}
+
+/* Responsive untuk layar kecil */
+@media (max-width: 768px) {
+  .filter-buttons {
+    justify-content: flex-start;
+  }
+  
+  .filter-btn {
+    font-size: 12px;
+    padding: 6px 12px;
+    min-height: 36px;
+  }
+}
+

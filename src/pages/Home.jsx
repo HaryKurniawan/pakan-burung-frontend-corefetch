@@ -10,7 +10,10 @@ const Home = () => {
   }
 
   return (
-    <div>
+    <div className='home-contain' >
+      <div className="poster">
+
+      </div>
       <ProductList products={products} />
     </div>
   );

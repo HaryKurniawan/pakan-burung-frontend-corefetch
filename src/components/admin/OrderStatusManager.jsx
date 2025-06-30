@@ -14,6 +14,7 @@ const OrderStatusManager = () => {
   const [orders, setOrders] = useState([]);
   const [statuses, setStatuses] = useState([]);
   const [filterStatus, setFilterStatus] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchOrders();
@@ -62,31 +63,98 @@ const OrderStatusManager = () => {
     }
   };
 
-  // Filter orders berdasarkan status yang dipilih
-  const filteredOrders = filterStatus === 'all' 
-    ? orders 
-    : orders.filter(order => order.status_id === parseInt(filterStatus));
+  // Hitung jumlah orders per status
+  const getOrderCountByStatus = (statusId) => {
+    return orders.filter(order => order.status_id === statusId).length;
+  };
+
+  // Filter orders berdasarkan status dan search query
+  const filteredOrders = orders.filter(order => {
+    // Filter berdasarkan status
+    const statusMatch = filterStatus === 'all' || order.status_id === parseInt(filterStatus);
+    
+    // Filter berdasarkan search query (case insensitive)
+    const searchMatch = searchQuery === '' || 
+      order.order_number.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return statusMatch && searchMatch;
+  });
+
+  // Filter status untuk tombol - kecualikan status "Selesai" dan yang serupa
+  const getFilterableStatuses = () => {
+    return statuses.filter(status => 
+      !status.nama.toLowerCase().includes('selesai') &&
+      !status.nama.toLowerCase().includes('complete') &&
+      !status.nama.toLowerCase().includes('done')
+    );
+  };
+
+  // Handler untuk clear search
+  const handleClearSearch = () => {
+    setSearchQuery('');
+  };
+
+  // Handler untuk paste dari clipboard
+  const handlePaste = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      setSearchQuery(text.trim());
+    } catch (error) {
+      console.error('Gagal mengambil data dari clipboard:', error);
+      alert('Gagal mengambil data dari clipboard. Pastikan browser mendukung fitur ini.');
+    }
+  };
 
   return (
     <div className="admin-orders">
-      <h3>Kelola Status Pesanan</h3>
-      
-      {/* Filter Status */}
-      <div className="filter-section">
-        <label htmlFor="status-filter">Filter Status: </label>
-        <select 
-          id="status-filter"
-          className="status-select"
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
+      {/* Search Bar */}
+      <div className="search-section">
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="Cari berdasarkan No. Pesanan..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="search-input"
+          />
+          {searchQuery && (
+            <button 
+              onClick={handleClearSearch}
+              className="clear-search-btn"
+              title="Hapus pencarian"
+            >
+              ×
+            </button>
+          )}
+        </div>
+        <button 
+          onClick={handlePaste}
+          className="paste-btn"
+          title="Paste dari clipboard"
         >
-          <option value="all">Semua Status</option>
-          {statuses.map((status) => (
-            <option key={status.id} value={status.id}>
-              {status.nama}
-            </option>
+          📋 Paste
+        </button>
+      </div>
+
+      {/* Filter Status dengan Button */}
+      <div className="filter-section">
+        <div className="filter-buttons">
+          <button 
+            className={`filter-btn ${filterStatus === 'all' ? 'active' : ''}`}
+            onClick={() => setFilterStatus('all')}
+          >
+            Semua Status
+          </button>
+          {getFilterableStatuses().map((status) => (
+            <button 
+              key={status.id}
+              className={`filter-btn ${filterStatus === status.id.toString() ? 'active' : ''}`}
+              onClick={() => setFilterStatus(status.id.toString())}
+            >
+              {status.nama} ({getOrderCountByStatus(status.id)})
+            </button>
           ))}
-        </select>
+        </div>
       </div>
 
       <div className="order-table-wrapper">
@@ -99,27 +167,38 @@ const OrderStatusManager = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredOrders.map((order) => (
-              <tr key={order.id}>
-                <td className="order-number">{order.order_number}</td>
-                <td className="order-status">
-                  {statuses.find(s => s.id === order.status_id)?.nama || 'Tidak Diketahui'}
-                </td>
-                <td>
-                  <select
-                    className="status-select"
-                    value={order.status_id}
-                    onChange={(e) => handleStatusChange(order.id, parseInt(e.target.value))}
-                  >
-                    {statuses.map((status) => (
-                      <option key={status.id} value={status.id}>
-                        {status.nama}
-                      </option>
-                    ))}
-                  </select>
+            {filteredOrders.length > 0 ? (
+              filteredOrders.map((order) => (
+                <tr key={order.id}>
+                  <td className="order-number">{order.order_number}</td>
+                  <td className="order-status">
+                    {statuses.find(s => s.id === order.status_id)?.nama || 'Tidak Diketahui'}
+                  </td>
+                  <td>
+                    <select
+                      className="status-select"
+                      value={order.status_id}
+                      onChange={(e) => handleStatusChange(order.id, parseInt(e.target.value))}
+                    >
+                      {statuses.map((status) => (
+                        <option key={status.id} value={status.id}>
+                          {status.nama}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="3" className="no-results">
+                  {searchQuery ? 
+                    `Tidak ditemukan pesanan dengan nomor "${searchQuery}"` : 
+                    'Tidak ada data pesanan'
+                  }
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

@@ -209,7 +209,6 @@ const VoucherManager = () => {
   return (
     <div className="voucher-manager">
       <div className="voucher-header">
-        <h2>Kelola Voucher</h2>
         <button 
           className="btn btn-primary"
           onClick={() => setShowForm(!showForm)}

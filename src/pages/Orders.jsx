@@ -317,20 +317,21 @@ const Orders = () => {
                       <div className="order-review-section">
                         {orderReviews[order.id] ? (
                           <div className="existing-review">
-                            {renderStars(orderReviews[order.id].rating)}
+                            
                             <button 
                               onClick={() => handleReviewOrder(order)}
                               className="edit-review-button"
                             >
                               Edit Ulasan
                             </button>
+                            {/* {renderStars(orderReviews[order.id].rating)} */}
                           </div>
                         ) : (
                           <button 
                             onClick={() => handleReviewOrder(order)}
                             className="review-button"
                           >
-                            ⭐ Beri Ulasan
+                            Beri Ulasan
                           </button>
                         )}
                       </div>
