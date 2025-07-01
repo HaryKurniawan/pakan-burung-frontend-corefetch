@@ -1,6 +1,6 @@
 // hooks/useCart.js
 import { useState, useEffect } from 'react';
-import { cartAPI } from '../services/api';
+import { cartAPI } from '../services/cartAPI';
 import { useAuth } from '../context/AuthContext';
 import { useCartContext } from '../context/CartContext';
 

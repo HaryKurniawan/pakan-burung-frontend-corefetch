@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { addressAPI } from '../services/api';
+// Ubah import ini saja
+import { addressAPI } from '../services/addressAPI';
 import './Address.css'; // Import CSS file
 import Header from '../components/common/Header'
 

@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { productsAPI, addressAPI, ordersAPI } from '../services/api';
+import {  ordersAPI } from '../services/ordersAPI';
+import { productsAPI } from '../services/productsAPI';
+
+
+import { addressAPI } from '../services/addressAPI';
 import { useCart } from '../hooks/useCart';
 import { useVouchers } from '../hooks/useVouchers';
 import { useProducts } from '../hooks/useProducts';

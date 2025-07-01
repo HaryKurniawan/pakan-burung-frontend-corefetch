@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { voucherAPI } from '../../services/api';
+import { voucherAPI } from '../../services/voucherAPI';
 
 const VoucherManager = () => {
   const [vouchers, setVouchers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingVoucher, setEditingVoucher] = useState(null);
-  const [activeTab, setActiveTab] = useState('list'); // 'list', 'usage', 'stats'
+  const [activeTab, setActiveTab] = useState('list');
   const [voucherUsage, setVoucherUsage] = useState([]);
   const [stats, setStats] = useState({});
 

@@ -2,7 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Modal } from 'antd';
-import api, { reviewsAPI } from '../services/api';
+import { api } from '../services/baseApi';
+
+import { reviewsAPI } from '../services/reviewsAPI';
 import { useCart } from '../hooks/useCart';
 import ProductImageViewer from '../components/ProductImageViewer';
 import './ProductDetail.css';

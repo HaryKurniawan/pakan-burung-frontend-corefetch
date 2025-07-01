@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ordersAPI } from '../services/api';
+import { ordersAPI } from '../services/ordersAPI';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/common/Header'
 import './OrderDetail.css'

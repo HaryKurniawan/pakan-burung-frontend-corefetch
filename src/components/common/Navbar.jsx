@@ -10,10 +10,6 @@ import OrderIcon from '../../assets/order.svg';
 import UserIcon from '../../assets/user.svg';
 import BackIcon from '../../assets/arrow-right.svg';
 
-
-
-
-
 const Navbar = () => {
   const { currentUser } = useAuth();
   const { cartCount } = useCartContext();

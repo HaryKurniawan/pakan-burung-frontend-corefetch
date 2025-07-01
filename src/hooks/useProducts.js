@@ -2,7 +2,7 @@
 // Add this function to your existing useProducts hook
 
 import { useState, useEffect } from 'react';
-import { productsAPI } from '../services/api'; // adjust import path as needed
+import { productsAPI } from '../services/productsAPI'; // adjust import path as needed
 
 export const useProducts = () => {
   const [products, setProducts] = useState([]);

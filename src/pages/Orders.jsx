@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ordersAPI, reviewsAPI } from '../services/api';
+import { ordersAPI } from '../services/ordersAPI';
+import { reviewsAPI } from '../services/reviewsAPI';
+
 import { useAuth } from '../context/AuthContext';
 import './orders.css'
 

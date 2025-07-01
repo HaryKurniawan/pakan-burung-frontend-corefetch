@@ -1,6 +1,6 @@
 // hooks/useVouchers.js
 import { useState, useEffect } from 'react';
-import { voucherAPI } from '../services/api';
+import { voucherAPI } from '../services/voucherAPI';
 
 export const useVouchers = () => {
   const [vouchers, setVouchers] = useState([]);

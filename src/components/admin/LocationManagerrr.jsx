@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { locationAPI, addressAPI } from '../../services/api';
+import { addressAPI } from '../../services/addressAPI';
+import { locationAPI } from '../../services/locationAPI';
+
 import '../styles/adminLocation.css'
 
 const LocationManagerrr = () => {
