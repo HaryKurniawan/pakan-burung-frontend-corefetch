@@ -110,3 +110,16 @@
   text-align: center;
 }
 
+.modal-content-bottom-btn{
+  width: 100%;
+  text-align: end;
+  padding: 10px 0;
+}
+
+.modal-content-bottom-btn button{
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+}

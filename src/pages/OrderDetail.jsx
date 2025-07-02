@@ -43,17 +43,17 @@ const OrderDetail = () => {
     try {
       await navigator.clipboard.writeText(order.order_number);
       setCopyMessage('Order ID berhasil disalin!');
-      setTimeout(() => setCopyMessage(''), 2000);
+      setTimeout(() => setCopyMessage(''), 3000);
     } catch (error) {
       console.error('Error copying order ID:', error);
       setCopyMessage('Gagal menyalin Order ID');
-      setTimeout(() => setCopyMessage(''), 2000);
+      setTimeout(() => setCopyMessage(''), 3000);
     }
   };
 
   const getStatusColor = (statusName) => {
     const colors = {
-      'pending': '#fbbf24',
+      'pending': '#f59e0b',
       'confirmed': '#3b82f6',
       'processing': '#8b5cf6',
       'shipped': '#06b6d4',
@@ -65,87 +65,120 @@ const OrderDetail = () => {
 
   if (loading) {
     return (
-      <div>
-        <p>Memuat detail pesanan...</p>
+      <div className="orderdetail-contain">
+        <Header title="Detail Pesanan" />
+        <div className="order-content">
+          <div className="loading-container">
+            <p className="loading-text">Memuat detail pesanan...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!order) {
     return (
-      <div>
-        <p>Data pesanan tidak ditemukan</p>
-        <button onClick={() => navigate('/orders')}>
-          Kembali ke Daftar Pesanan
-        </button>
+      <div className="orderdetail-contain">
+        <Header title="Detail Pesanan" />
+        <div className="order-content">
+          <div className="error-container">
+            <p className="error-text">Data pesanan tidak ditemukan</p>
+            <button className="back-button" onClick={() => navigate('/orders')}>
+              Kembali ke Daftar Pesanan
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className='orderdetail-contain'>
-       <Header title="Detail Pesanan" />
+      <Header title="Detail Pesanan" />
       
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <h2>No. {order.order_number}</h2>
-          <button onClick={copyOrderId}>
-            Salin ID
-          </button>
-        </div>
-        
-        {copyMessage && (
-          <p style={{ color: 'green', fontSize: '14px', margin: '5px 0' }}>
-            {copyMessage}
-          </p>
-        )}
-        
-        <div>
-          <p>Tanggal Pesanan: {new Date(order.created_at).toLocaleDateString('id-ID', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          })}</p>
-          
-          <div style={{ backgroundColor: getStatusColor(order.order_status.nama), padding: '8px', borderRadius: '4px', display: 'inline-block' }}>
-            {order.order_status.deskripsi}
+      <div className="order-content">
+        <div className="order-card">
+          {/* Order Header */}
+          <div className="order-header">
+            <div>
+              <h1 className="order-number">No. {order.order_number}</h1>
+              {copyMessage && (
+                <p className="copy-message">{copyMessage}</p>
+              )}
+            </div>
+            <button className="copy-button" onClick={copyOrderId}>
+              📋 Salin ID
+            </button>
           </div>
-        </div>
+          
+          {/* Order Info */}
+          <div className="order-info">
+            <p className="order-date">
+              📅 {new Date(order.created_at).toLocaleDateString('id-ID', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              })}
+            </p>
+            
+            <div 
+              className="status-badge"
+              style={{ backgroundColor: getStatusColor(order.order_status.nama) }}
+            >
+              {order.order_status.deskripsi}
+            </div>
+          </div>
 
-        <div>
-          <h3>Item Pesanan</h3>
-          {order.order_items.map(item => (
-            <div key={item.id}>
-              <div>
-                <span>{item.products.nama_produk}</span>
-                <span>{item.quantity || item.jumlah} × Rp {Number(item.price).toLocaleString()}</span>
-                <strong>Rp {Number(item.subtotal).toLocaleString()}</strong>
+          {/* Order Items */}
+          <div className="section">
+            <h2 className="section-title">🛍️ Item Pesanan</h2>
+            {order.order_items.map(item => (
+              <div key={item.id} className="order-item">
+                <div className="item-content">
+                  <div className="item-name">{item.products.nama_produk}</div>
+                  <div className="item-details">
+                    <span className="item-quantity">
+                      {item.quantity || item.jumlah} × Rp {Number(item.price).toLocaleString('id-ID')}
+                    </span>
+                    <span className="item-subtotal">
+                      Rp {Number(item.subtotal).toLocaleString('id-ID')}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Shipping Address */}
+          <div className="section">
+            <h2 className="section-title">📍 Alamat Pengiriman</h2>
+            <div className="address-info">
+              <p><strong>{order.user_addresses.alamat_lengkap}</strong></p>
+              <p>{order.user_addresses.nama_desa}, RT {order.user_addresses.rt}/RW {order.user_addresses.rw}</p>
+              <p>{order.user_addresses.kecamatan?.nama}, {order.user_addresses.kota_kabupaten?.nama}</p>
+              <p>{order.user_addresses.provinsi?.nama}</p>
+            </div>
+          </div>
+
+          {/* Notes */}
+          {order.notes && (
+            <div className="section">
+              <h2 className="section-title">📝 Catatan</h2>
+              <div className="notes-content">
+                {order.notes}
               </div>
             </div>
-          ))}
-        </div>
+          )}
 
-        <div>
-          <h3>Alamat Pengiriman</h3>
-          <p>{order.user_addresses.alamat_lengkap}</p>
-          <p>{order.user_addresses.nama_desa}, RT {order.user_addresses.rt}/RW {order.user_addresses.rw}</p>
-          <p>{order.user_addresses.kecamatan?.nama}, {order.user_addresses.kota_kabupaten?.nama}</p>
-          <p>{order.user_addresses.provinsi?.nama}</p>
-        </div>
-
-        {order.notes && (
-          <div>
-            <h3>Catatan</h3>
-            <p>{order.notes}</p>
+          {/* Total */}
+          <div className="total-section">
+            <h2 className="total-amount">
+              Total: Rp {Number(order.total_amount).toLocaleString('id-ID')}
+            </h2>
           </div>
-        )}
-
-        <div>
-          <h3>Total: Rp {Number(order.total_amount).toLocaleString()}</h3>
         </div>
-
       </div>
     </div>
   );

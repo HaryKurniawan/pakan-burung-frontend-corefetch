@@ -1,6 +1,7 @@
 import React from 'react';
 import ProductList from '../components/product/ProductList';
 import { useProducts } from '../hooks/useProducts';
+import './home.css'
 
 const Home = () => {
   const { products, loading } = useProducts();

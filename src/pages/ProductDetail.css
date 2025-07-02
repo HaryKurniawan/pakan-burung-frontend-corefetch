@@ -81,3 +81,36 @@
 .contain-top-detail p{
   font-size: 14px;
 }
+
+.modal-quantity-controls{
+  display: flex;
+}
+
+.modal-action-to-checkout{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 20px;
+}
+
+.modal-action-to-checkout p{
+  margin-top: -16px;
+}
+
+.modal-content-top{
+  display: flex;
+  width: 100%;
+}
+
+.modal-product-imagee{
+  width: 100px;
+  height: 100px;
+  border: 1px solid #656464;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.modal-content-bottom{
+  display: flex;
+  justify-content: space-between;
+}

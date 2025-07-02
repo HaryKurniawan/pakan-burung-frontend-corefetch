@@ -190,52 +190,39 @@ const ProductDetail = () => {
       </div>
 
       <Modal
-        title={modalType === 'cart' ? 'Tambah ke Keranjang' : 'Beli Sekarang'}
         open={modalVisible}
         onCancel={handleModalCancel}
-        footer={[
-          <button key="cancel" className="btn btn-secondary" onClick={handleModalCancel}>
-            Batal
-          </button>,
-          <button 
-            key="confirm" 
-            className="btn btn-primary"
-            onClick={handleModalConfirm}
-            disabled={modalQuantity < 1 || modalQuantity > product.stok}
-          >
-            {modalType === 'cart' ? 'Tambah ke Keranjang' : 'Lanjut ke Checkout'}
-          </button>,
-        ]}
+        footer={[]}
         width={600}
       >
-        <div className="modal-content">
-          {/* Product Image */}
-          <div className="modal-product-image">
-            {productImages.length > 0 ? (
-              <img
-                src={productImages[0]}
-                alt={product.nama_produk}
-                className="product-image"
-              />
-            ) : (
-              <div className="no-image">
-                <span className="text-secondary">No Image</span>
+        <div className="modal-contentt">
+
+            <div className="modal-content-top">
+
+              <div className="modal-product-imagee">
+                {productImages.length > 0 ? (
+                <img src={productImages[0]} className="product-images" />
+                  ) : (
+                  <div className="no-image">
+                    <span className="text-secondary">No Image</span>
+                  </div>
+                  )}
               </div>
-            )}
-          </div>
-          
-          <div className="modal-product-info">
 
-            <p className="modal-product-title">{product.nama_produk}</p>
-            <h3 className="modal-product-price">Rp {Number(product.harga).toLocaleString()}</h3>
+              <div className="modal-action-to-checkout">
+                <h3 className="modal-product-price">Rp {Number(product.harga).toLocaleString()}</h3>
+                <p>Stok:{product.stok}</p>
+              </div>
+            </div>
+<hr />
+            <div className="modal-content-bottom">
 
-            <hr className="modal-divider" />
+              <p>
+                Jumlah
+              </p>
 
-            <div className="modal-quantity-container">
-
-              <span className="modal-quantity-label">Jumlah:</span>
               <div className="modal-quantity-controls">
-                <button className="btn btn-small" onClick={() => handleQuantityChange(modalQuantity - 1)} disabled={modalQuantity <= 1}>-</button>
+                <button className="btn-small" onClick={() => handleQuantityChange(modalQuantity - 1)} disabled={modalQuantity <= 1}>-</button>
                 <input
                   type="number"
                   min={1}
@@ -244,19 +231,21 @@ const ProductDetail = () => {
                   onChange={(e) => handleQuantityChange(parseInt(e.target.value))}
                   className="quantity-input"
                 />
-                <button
-                  className="btn btn-small"
-                  onClick={() => handleQuantityChange(modalQuantity + 1)}
-                  disabled={modalQuantity >= product.stok}
-                >
-                  +
-                </button>
+                <button className="btn-small" onClick={() => handleQuantityChange(modalQuantity + 1)} disabled={modalQuantity >= product.stok} >+</button>
               </div>
+
             </div>
-            <div className="modal-total-price">
-              <strong>Total: Rp {(product.harga * modalQuantity).toLocaleString()}</strong>
+            
+            <div className="modal-content-bottom-btn">
+<button 
+                key="confirm" 
+                onClick={handleModalConfirm}
+                disabled={modalQuantity < 1 || modalQuantity > product.stok}
+              >
+                {modalType === 'cart' ? 'Tambah ke Keranjang' : 'Lanjut ke Checkout'}
+              </button>
             </div>
-          </div>
+              
         </div>
       </Modal>
 
